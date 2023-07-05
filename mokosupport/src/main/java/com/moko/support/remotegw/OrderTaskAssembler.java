@@ -1,5 +1,7 @@
 package com.moko.support.remotegw;
 
+import android.annotation.TargetApi;
+
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.support.remotegw.entity.ParamsKeyEnum;
 import com.moko.support.remotegw.entity.ParamsLongKeyEnum;
@@ -244,6 +246,12 @@ public class OrderTaskAssembler {
         return task;
     }
 
+    public static OrderTask getCountry() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_COUNTRY_BRAND);
+        return task;
+    }
+
     public static OrderTask getWifiEapUsername() {
         ParamsTask task = new ParamsTask();
         task.setData(ParamsKeyEnum.KEY_WIFI_EAP_USERNAME);
@@ -325,6 +333,66 @@ public class OrderTaskAssembler {
     public static OrderTask getFilterNameRules() {
         ParamsTask task = new ParamsTask();
         task.setData(ParamsLongKeyEnum.KEY_FILTER_NAME_RULES);
+        return task;
+    }
+
+    public static OrderTask getIBeaconEnable() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_I_BEACON_SWITCH);
+        return task;
+    }
+
+    public static OrderTask getIBeaconMajor() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_I_BEACON_MAJOR);
+        return task;
+    }
+
+    public static OrderTask getIBeaconMinor() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_I_BEACON_MINOR);
+        return task;
+    }
+
+    public static OrderTask getIBeaconUUid() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_I_BEACON_UUID);
+        return task;
+    }
+
+    public static OrderTask getIBeaconAdInterval() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_I_BEACON_AD_INTERVAL);
+        return task;
+    }
+
+    public static OrderTask getIBeaconTxPower() {
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_I_BEACON_TX_POWER);
+        return task;
+    }
+
+    public static OrderTask getMeteringReportEnable(){
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_METERING_REPORT_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getPowerReportInterval(){
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_POWER_REPORT_INTERVAL);
+        return task;
+    }
+
+    public static OrderTask getEnergyReportInterval(){
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_ENERGY_REPORT_INTERVAL);
+        return task;
+    }
+
+    public static OrderTask getLoadDetectionNotifyEnable(){
+        ParamsTask task = new ParamsTask();
+        task.setData(ParamsKeyEnum.KEY_LOAD_DETECTION_NOTIFY_ENABLE);
         return task;
     }
 
@@ -539,6 +607,12 @@ public class OrderTaskAssembler {
         return task;
     }
 
+    public static OrderTask setCountryBrand(@IntRange(from = 0, to = 68) int country) {
+        ParamsTask task = new ParamsTask();
+        task.setCountryBrand(country);
+        return task;
+    }
+
     public static OrderTask setWifiEapUsername(String username) {
         ParamsTask task = new ParamsTask();
         task.setWifiEapUsername(username);
@@ -668,6 +742,66 @@ public class OrderTaskAssembler {
     public static OrderTask setWifiClientKey(File file) throws Exception {
         ParamsTask task = new ParamsTask();
         task.setFile(ParamsLongKeyEnum.KEY_WIFI_CLIENT_KEY, file);
+        return task;
+    }
+
+    public static OrderTask setIBeaconEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsTask task = new ParamsTask();
+        task.setIBeaconEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setIBeaconMajor(@IntRange(from = 0, to = 65535) int major) {
+        ParamsTask task = new ParamsTask();
+        task.setIBeaconMajor(major);
+        return task;
+    }
+
+    public static OrderTask setIBeaconMinor(@IntRange(from = 0, to = 65535) int minor) {
+        ParamsTask task = new ParamsTask();
+        task.setIBeaconMinor(minor);
+        return task;
+    }
+
+    public static OrderTask setIBeaconUuid(String uuid) {
+        ParamsTask task = new ParamsTask();
+        task.setIBeaconUuid(uuid);
+        return task;
+    }
+
+    public static OrderTask setIBeaconAdInterval(@IntRange(from = 1, to = 100) int interval) {
+        ParamsTask task = new ParamsTask();
+        task.setIBeaconAdInterval(interval);
+        return task;
+    }
+
+    public static OrderTask setIBeaconTxPower(@IntRange(from = 0, to = 15) int txPower) {
+        ParamsTask task = new ParamsTask();
+        task.setIBeaconTxPower(txPower);
+        return task;
+    }
+
+    public static OrderTask setMeteringReportEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsTask task = new ParamsTask();
+        task.setMeteringReportEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setPowerReportInterval(@IntRange(from = 1, to = 86400) int interval) {
+        ParamsTask task = new ParamsTask();
+        task.setPowerReportInterval(interval);
+        return task;
+    }
+
+    public static OrderTask setEnergyReportInterval(@IntRange(from = 1, to = 1440) int interval) {
+        ParamsTask task = new ParamsTask();
+        task.setEnergyReportInterval(interval);
+        return task;
+    }
+
+    public static OrderTask setLoadDetectionNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsTask task = new ParamsTask();
+        task.setLoadDetectionNotifyEnable(enable);
         return task;
     }
 }

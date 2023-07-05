@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.elvishew.xlog.XLog;
 import com.moko.ble.lib.MokoConstants;
@@ -36,14 +39,10 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
@@ -69,17 +68,13 @@ public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> 
         mAdapter.openLoadAnimation();
         mAdapter.replaceData(mDevices);
         mAdapter.setOnItemClickListener(this);
-        mBind.rvDevices.setLayoutManager(new LinearLayoutManager(this));
         mBind.rvDevices.setAdapter(mAdapter);
         mokoBleScanner = new MokoBleScanner(this);
         mHandler = new Handler(Looper.getMainLooper());
         mSavedPassword = SPUtiles.getStringValue(this, AppConstants.SP_KEY_PASSWORD, "");
-        if (animation == null) {
-            startScan();
-        }
+        if (animation == null) startScan();
         mBind.ivRefresh.setOnClickListener(v -> {
-            if (isWindowLocked())
-                return;
+            if (isWindowLocked()) return;
             if (animation == null) {
                 startScan();
             } else {
@@ -116,6 +111,7 @@ public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> 
     public void onScanDevice(DeviceInfo deviceInfo) {
         ScanResult scanResult = deviceInfo.scanResult;
         ScanRecord scanRecord = scanResult.getScanRecord();
+        if (null == scanRecord) return;
         Map<ParcelUuid, byte[]> map = scanRecord.getServiceData();
         if (map == null || map.isEmpty()) return;
         byte[] data = map.get(new ParcelUuid(OrderServices.SERVICE_ADV.getUuid()));
@@ -136,16 +132,13 @@ public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> 
         // 排序
         if (!mDevices.isEmpty()) {
             System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
-            Collections.sort(mDevices, new Comparator<DeviceInfo>() {
-                @Override
-                public int compare(DeviceInfo lhs, DeviceInfo rhs) {
-                    if (lhs.rssi > rhs.rssi) {
-                        return -1;
-                    } else if (lhs.rssi < rhs.rssi) {
-                        return 1;
-                    }
-                    return 0;
+            Collections.sort(mDevices, (lhs, rhs) -> {
+                if (lhs.rssi > rhs.rssi) {
+                    return -1;
+                } else if (lhs.rssi < rhs.rssi) {
+                    return 1;
                 }
+                return 0;
             });
         }
     }
@@ -159,12 +152,7 @@ public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> 
         animation = AnimationUtils.loadAnimation(this, R.anim.rotate_refresh);
         mBind.ivRefresh.startAnimation(animation);
         mokoBleScanner.startScanDevice(this);
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mokoBleScanner.stopScanDevice();
-            }
-        }, 1000 * 60);
+        mHandler.postDelayed(() -> mokoBleScanner.stopScanDevice(), 1000 * 60);
     }
 
     @Override
@@ -258,10 +246,8 @@ public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> 
             OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
             int responseType = response.responseType;
             byte[] value = response.responseValue;
-            switch (orderCHAR) {
-                case CHAR_PASSWORD:
-                    MokoSupport.getInstance().disConnectBle();
-                    break;
+            if (orderCHAR == OrderCHAR.CHAR_PASSWORD) {
+                MokoSupport.getInstance().disConnectBle();
             }
         }
         if (MokoConstants.ACTION_ORDER_RESULT.equals(action)) {
@@ -269,35 +255,34 @@ public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> 
             OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
             int responseType = response.responseType;
             byte[] value = response.responseValue;
-            switch (orderCHAR) {
-                case CHAR_PASSWORD:
-                    dismissLoadingMessageDialog();
-                    if (value.length == 5) {
-                        int header = value[0] & 0xFF;// 0xED
-                        int flag = value[1] & 0xFF;// read or write
-                        int cmd = value[2] & 0xFF;
-                        if (header != 0xED)
-                            return;
-                        int length = value[3] & 0xFF;
-                        if (flag == 0x01 && cmd == 0x01 && length == 0x01) {
-                            int result = value[4] & 0xFF;
-                            if (1 == result) {
-                                mSavedPassword = mPassword;
-                                SPUtiles.setStringValue(this, AppConstants.SP_KEY_PASSWORD, mSavedPassword);
-                                XLog.i("Success");
+            if (orderCHAR == OrderCHAR.CHAR_PASSWORD) {
+                dismissLoadingMessageDialog();
+                if (value.length == 5) {
+                    int header = value[0] & 0xFF;// 0xED
+                    int flag = value[1] & 0xFF;// read or write
+                    int cmd = value[2] & 0xFF;
+                    if (header != 0xED)
+                        return;
+                    int length = value[3] & 0xFF;
+                    if (flag == 0x01 && cmd == 0x01 && length == 0x01) {
+                        int result = value[4] & 0xFF;
+                        if (1 == result) {
+                            mSavedPassword = mPassword;
+                            SPUtiles.setStringValue(this, AppConstants.SP_KEY_PASSWORD, mSavedPassword);
+                            XLog.i("Success");
 
-                                // 跳转配置页面
-                                Intent intent = new Intent(this, DeviceConfigActivity.class);
-                                intent.putExtra(AppConstants.EXTRA_KEY_SELECTED_DEVICE_TYPE, mSelectedDeviceType);
-                                startLauncher.launch(intent);
-                            }
-                            if (0 == result) {
-                                isPasswordError = true;
-                                ToastUtils.showToast(this, "Password Error");
-                                MokoSupport.getInstance().disConnectBle();
-                            }
+                            // 跳转配置页面
+                            Intent intent = new Intent(this, DeviceConfigActivity.class);
+                            intent.putExtra(AppConstants.EXTRA_KEY_SELECTED_DEVICE_TYPE, mSelectedDeviceType);
+                            startLauncher.launch(intent);
+                        }
+                        if (0 == result) {
+                            isPasswordError = true;
+                            ToastUtils.showToast(this, "Password Error");
+                            MokoSupport.getInstance().disConnectBle();
                         }
                     }
+                }
             }
         }
     }
@@ -307,5 +292,4 @@ public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> 
             ToastUtils.showToast(this, "Disconnected");
         }
     });
-
 }

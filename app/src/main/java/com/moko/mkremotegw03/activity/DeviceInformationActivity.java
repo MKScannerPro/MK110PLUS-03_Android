@@ -41,7 +41,6 @@ public class DeviceInformationActivity extends BaseActivity<ActivityDeviceInform
         }, 500);
     }
 
-
     @Override
     protected ActivityDeviceInformationBinding getViewBinding() {
         return ActivityDeviceInformationBinding.inflate(getLayoutInflater());

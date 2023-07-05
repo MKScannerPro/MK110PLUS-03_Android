@@ -7,6 +7,8 @@ import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
@@ -32,8 +34,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import androidx.annotation.Nullable;
-
 public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBinding> {
 
     private final String FILTER_ASCII = "[ -~]*";
@@ -48,6 +48,14 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
     private String mCaPath;
     private String mCertPath;
     private String mKeyPath;
+    private final String[] countryBrand = {"United Arab Emirates", "Argentina", "American Samoa", "Austria", "Australia", "Barbados", "Burkina Faso", "Bermuda",
+            "Brazil", "Bahamas", "Canada", "Central African Republic", "Côte d'Ivoire", "China", "Colombia", "Costa Rica", "Cuba", "Christmas Island", "Dominica",
+            "Dominican Republic", "Ecuador", "Europe", "Micronesia, Federated States of", "France", "Grenada", "Ghana", "Greece", "Guatemala", "Guam", "Guyana", "Honduras",
+            "Haiti", "Jamaica", "Cayman Islands", "Kazakhstan", "Lebanon", "Sri Lanka", "Marshall Islands", "Mongolia", "Macao, SAR China", "Northern Mariana Islands",
+            "Mauritius", "Mexico", "Malaysia", "Nicaragua", "Panama", "Peru", "Papua New Guinea", "Philippines", "Puerto Rico", "Palau", "Paraguay", "Rwanda", "Singapore",
+            "Senegal", "El Salvador", "Syrian Arab Republic (Syria)", "Turks and Caicos Islands", "Thailand", "Trinidad and Tobago", "Taiwan, Republic of China",
+            "Tanzania, United Republic of", "Uganda", "United States of America", "Uruguay", "Venezuela (Bolivarian Republic)", "Virgin Islands,US", "Viet Nam", "Vanuatu"};
+    private int countrySelected;
 
     @Override
     protected void onCreate() {
@@ -66,7 +74,6 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
             }
-
             return null;
         };
         mBind.etUsername.setFilters(new InputFilter[]{new InputFilter.LengthFilter(32), filter});
@@ -81,6 +88,7 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
             orderTasks.add(OrderTaskAssembler.getWifiSSID());
             orderTasks.add(OrderTaskAssembler.getWifiPassword());
             orderTasks.add(OrderTaskAssembler.getWifiEapType());
+            orderTasks.add(OrderTaskAssembler.getCountry());
             orderTasks.add(OrderTaskAssembler.getWifiEapUsername());
             orderTasks.add(OrderTaskAssembler.getWifiEapPassword());
             orderTasks.add(OrderTaskAssembler.getWifiEapDomainId());
@@ -118,137 +126,142 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
             OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
             int responseType = response.responseType;
             byte[] value = response.responseValue;
-            switch (orderCHAR) {
-                case CHAR_PARAMS:
-                    if (value.length >= 4) {
-                        int header = value[0] & 0xFF;// 0xED
-                        int flag = value[1] & 0xFF;// read or write
-                        int cmd = value[2] & 0xFF;
-                        if (header == 0xEE) {
-                            ParamsLongKeyEnum configKeyEnum = ParamsLongKeyEnum.fromParamKey(cmd);
-                            if (configKeyEnum == null) {
-                                return;
-                            }
-                            if (flag == 0x01) {
-                                // write
-                                int result = value[4] & 0xFF;
-                                switch (configKeyEnum) {
-                                    case KEY_WIFI_CLIENT_KEY:
-                                    case KEY_WIFI_CLIENT_CERT:
-                                    case KEY_WIFI_CA:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        break;
-                                }
-                            }
+            if (orderCHAR == OrderCHAR.CHAR_PARAMS) {
+                if (value.length >= 4) {
+                    int header = value[0] & 0xFF;// 0xED
+                    int flag = value[1] & 0xFF;// read or write
+                    int cmd = value[2] & 0xFF;
+                    if (header == 0xEE) {
+                        ParamsLongKeyEnum configKeyEnum = ParamsLongKeyEnum.fromParamKey(cmd);
+                        if (configKeyEnum == null) {
+                            return;
                         }
-                        if (header == 0xED) {
-                            ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
-                            if (configKeyEnum == null) {
-                                return;
-                            }
-                            int length = value[3] & 0xFF;
-                            if (flag == 0x01) {
-                                // write
-                                int result = value[4] & 0xFF;
-                                switch (configKeyEnum) {
-                                    case KEY_WIFI_SECURITY_TYPE:
-                                    case KEY_WIFI_SSID:
-                                    case KEY_WIFI_EAP_USERNAME:
-                                    case KEY_WIFI_EAP_PASSWORD:
-                                    case KEY_WIFI_EAP_DOMAIN_ID:
-                                    case KEY_WIFI_EAP_VERIFY_SERVICE_ENABLE:
-                                    case KEY_WIFI_PASSWORD:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        break;
-                                    case KEY_WIFI_EAP_TYPE:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        if (mSavedParamsError) {
-                                            ToastUtils.showToast(this, "Setup failed！");
-                                        } else {
-                                            mIsSaved = true;
-                                            ToastUtils.showToast(this, "Setup succeed！");
-                                        }
-                                        break;
-                                }
-                            }
-                            if (flag == 0x00) {
-                                if (length == 0)
-                                    return;
-                                // read
-                                switch (configKeyEnum) {
-                                    case KEY_WIFI_SECURITY_TYPE:
-                                        mSecuritySelected = value[4];
-                                        mBind.tvSecurity.setText(mSecurityValues.get(mSecuritySelected));
-                                        mBind.clEapType.setVisibility(mSecuritySelected != 0 ? View.VISIBLE : View.GONE);
-                                        mBind.clPassword.setVisibility(mSecuritySelected != 0 ? View.GONE : View.VISIBLE);
-                                        if (mSecuritySelected == 0) {
-                                            mBind.llCa.setVisibility(View.GONE);
-                                        } else {
-                                            if (mEAPTypeSelected != 2) {
-                                                mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
-                                            } else {
-                                                mBind.llCa.setVisibility(View.VISIBLE);
-                                            }
-                                        }
-                                        break;
-                                    case KEY_WIFI_SSID:
-                                        mBind.etSsid.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
-                                        break;
-                                    case KEY_WIFI_PASSWORD:
-                                        mBind.etPassword.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
-                                        break;
-                                    case KEY_WIFI_EAP_PASSWORD:
-                                        mBind.etEapPassword.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
-                                        break;
-                                    case KEY_WIFI_EAP_TYPE:
-                                        mEAPTypeSelected = value[4];
-                                        mBind.tvEapType.setText(mEAPTypeValues.get(mEAPTypeSelected));
-                                        if (mSecuritySelected == 0) {
-                                            mBind.llCa.setVisibility(View.GONE);
-                                            mBind.clUsername.setVisibility(View.GONE);
-                                            mBind.clEapPassword.setVisibility(View.GONE);
-                                            mBind.cbVerifyServer.setVisibility(View.GONE);
-                                            mBind.clDomainId.setVisibility(View.GONE);
-                                            mBind.llCert.setVisibility(View.GONE);
-                                            mBind.llKey.setVisibility(View.GONE);
-                                            mBind.tvCertTips.setVisibility(View.GONE);
-                                        } else {
-                                            if (mEAPTypeSelected != 2)
-                                                mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
-                                            else
-                                                mBind.llCa.setVisibility(View.VISIBLE);
-                                            mBind.clUsername.setVisibility(mEAPTypeSelected == 2 ? View.GONE : View.VISIBLE);
-                                            mBind.clEapPassword.setVisibility(mEAPTypeSelected == 2 ? View.GONE : View.VISIBLE);
-                                            mBind.cbVerifyServer.setVisibility(mEAPTypeSelected == 2 ? View.INVISIBLE : View.VISIBLE);
-                                            mBind.clDomainId.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
-                                            mBind.llCert.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
-                                            mBind.llKey.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
-                                            mBind.tvCertTips.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
-                                        }
-                                        break;
-                                    case KEY_WIFI_EAP_USERNAME:
-                                        mBind.etUsername.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
-                                        break;
-                                    case KEY_WIFI_EAP_DOMAIN_ID:
-                                        mBind.etDomainId.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
-                                        break;
-                                    case KEY_WIFI_EAP_VERIFY_SERVICE_ENABLE:
-                                        mBind.cbVerifyServer.setChecked(value[4] == 1);
-                                        if (mSecuritySelected != 0 && mEAPTypeSelected != 2)
-                                            mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
-                                        break;
-
-                                }
+                        if (flag == 0x01) {
+                            // write
+                            int result = value[4] & 0xFF;
+                            switch (configKeyEnum) {
+                                case KEY_WIFI_CLIENT_KEY:
+                                case KEY_WIFI_CLIENT_CERT:
+                                case KEY_WIFI_CA:
+                                    if (result != 1) {
+                                        mSavedParamsError = true;
+                                    }
+                                    break;
                             }
                         }
                     }
-                    break;
+                    if (header == 0xED) {
+                        ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
+                        if (configKeyEnum == null) {
+                            return;
+                        }
+                        int length = value[3] & 0xFF;
+                        if (flag == 0x01) {
+                            // write
+                            int result = value[4] & 0xFF;
+                            switch (configKeyEnum) {
+                                case KEY_WIFI_SECURITY_TYPE:
+                                case KEY_WIFI_SSID:
+                                case KEY_WIFI_EAP_USERNAME:
+                                case KEY_WIFI_EAP_PASSWORD:
+                                case KEY_WIFI_EAP_DOMAIN_ID:
+                                case KEY_WIFI_EAP_VERIFY_SERVICE_ENABLE:
+                                case KEY_WIFI_PASSWORD:
+                                case KEY_COUNTRY_BRAND:
+                                    if (result != 1) {
+                                        mSavedParamsError = true;
+                                    }
+                                    break;
+                                case KEY_WIFI_EAP_TYPE:
+                                    if (result != 1) {
+                                        mSavedParamsError = true;
+                                    }
+                                    if (mSavedParamsError) {
+                                        ToastUtils.showToast(this, "Setup failed！");
+                                    } else {
+                                        mIsSaved = true;
+                                        ToastUtils.showToast(this, "Setup succeed！");
+                                    }
+                                    break;
+                            }
+                        }
+                        if (flag == 0x00) {
+                            if (length == 0) return;
+                            // read
+                            switch (configKeyEnum) {
+                                case KEY_WIFI_SECURITY_TYPE:
+                                    mSecuritySelected = value[4];
+                                    mBind.tvSecurity.setText(mSecurityValues.get(mSecuritySelected));
+                                    mBind.clEapType.setVisibility(mSecuritySelected != 0 ? View.VISIBLE : View.GONE);
+                                    mBind.clPassword.setVisibility(mSecuritySelected != 0 ? View.GONE : View.VISIBLE);
+                                    if (mSecuritySelected == 0) {
+                                        mBind.llCa.setVisibility(View.GONE);
+                                    } else {
+                                        if (mEAPTypeSelected != 2) {
+                                            mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
+                                        } else {
+                                            mBind.llCa.setVisibility(View.VISIBLE);
+                                        }
+                                    }
+                                    break;
+                                case KEY_WIFI_SSID:
+                                    mBind.etSsid.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
+                                    break;
+                                case KEY_WIFI_PASSWORD:
+                                    mBind.etPassword.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
+                                    break;
+                                case KEY_WIFI_EAP_PASSWORD:
+                                    mBind.etEapPassword.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
+                                    break;
+                                case KEY_WIFI_EAP_TYPE:
+                                    mEAPTypeSelected = value[4];
+                                    mBind.tvEapType.setText(mEAPTypeValues.get(mEAPTypeSelected));
+                                    if (mSecuritySelected == 0) {
+                                        mBind.llCa.setVisibility(View.GONE);
+                                        mBind.clUsername.setVisibility(View.GONE);
+                                        mBind.clEapPassword.setVisibility(View.GONE);
+                                        mBind.cbVerifyServer.setVisibility(View.GONE);
+                                        mBind.clDomainId.setVisibility(View.GONE);
+                                        mBind.llCert.setVisibility(View.GONE);
+                                        mBind.llKey.setVisibility(View.GONE);
+                                        mBind.tvCertTips.setVisibility(View.GONE);
+                                    } else {
+                                        if (mEAPTypeSelected != 2)
+                                            mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
+                                        else
+                                            mBind.llCa.setVisibility(View.VISIBLE);
+                                        mBind.clUsername.setVisibility(mEAPTypeSelected == 2 ? View.GONE : View.VISIBLE);
+                                        mBind.clEapPassword.setVisibility(mEAPTypeSelected == 2 ? View.GONE : View.VISIBLE);
+                                        mBind.cbVerifyServer.setVisibility(mEAPTypeSelected == 2 ? View.INVISIBLE : View.VISIBLE);
+                                        mBind.clDomainId.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
+                                        mBind.llCert.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
+                                        mBind.llKey.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
+                                        mBind.tvCertTips.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
+                                    }
+                                    break;
+                                case KEY_WIFI_EAP_USERNAME:
+                                    mBind.etUsername.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
+                                    break;
+                                case KEY_WIFI_EAP_DOMAIN_ID:
+                                    mBind.etDomainId.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
+                                    break;
+                                case KEY_WIFI_EAP_VERIFY_SERVICE_ENABLE:
+                                    mBind.cbVerifyServer.setChecked(value[4] == 1);
+                                    if (mSecuritySelected != 0 && mEAPTypeSelected != 2)
+                                        mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
+                                    break;
+
+                                case KEY_COUNTRY_BRAND:
+                                    if (length == 1) {
+                                        countrySelected = value[4] & 0xff;
+                                        mBind.tvCountryBrand.setText(countryBrand[countrySelected]);
+                                    }
+                                    break;
+
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -284,6 +297,17 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
                 mBind.llKey.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
                 mBind.tvCertTips.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
             }
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
+    public void onSelectCountry(View view) {
+        if (isWindowLocked()) return;
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas((ArrayList<String>) (Arrays.asList(countryBrand)), countrySelected);
+        dialog.setListener(value -> {
+            countrySelected = value;
+            mBind.tvCountryBrand.setText(countryBrand[value]);
         });
         dialog.show(getSupportFragmentManager());
     }
@@ -406,6 +430,7 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
 
                 }
             }
+            orderTasks.add(OrderTaskAssembler.setCountryBrand(countrySelected));
             orderTasks.add(OrderTaskAssembler.setWifiEapType(mEAPTypeSelected));
             MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         } catch (Exception e) {

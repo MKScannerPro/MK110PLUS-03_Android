@@ -279,6 +279,10 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
         startActivity(intent);
     }
 
+    public void onPowerMeteringSetting(View view){
+
+    }
+
     public void onScannerOptionSetting(View view) {
         if (isWindowLocked())
             return;
@@ -363,7 +367,6 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
             e.printStackTrace();
         }
     }
-
 
     private void readOtherInfo(String mac) {
         mHandler.postDelayed(() -> {

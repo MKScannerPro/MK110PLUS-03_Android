@@ -78,6 +78,17 @@ public class ParamsTask extends OrderTask {
             case KEY_FILTER_MAC_RULES:
             case KEY_FILTER_NAME_PRECISE:
             case KEY_FILTER_NAME_REVERSE:
+            case KEY_COUNTRY_BRAND:
+            case KEY_I_BEACON_SWITCH:
+            case KEY_I_BEACON_MAJOR:
+            case KEY_I_BEACON_MINOR:
+            case KEY_I_BEACON_UUID:
+            case KEY_I_BEACON_AD_INTERVAL:
+            case KEY_I_BEACON_TX_POWER:
+            case KEY_METERING_REPORT_ENABLE:
+            case KEY_POWER_REPORT_INTERVAL:
+            case KEY_ENERGY_REPORT_INTERVAL:
+            case KEY_LOAD_DETECTION_NOTIFY_ENABLE:
                 createGetConfigData(key.getParamsKey());
                 break;
         }
@@ -518,6 +529,16 @@ public class ParamsTask extends OrderTask {
         response.responseValue = data;
     }
 
+    public void setCountryBrand(@IntRange(from = 0, to = 68) int country) {
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_COUNTRY_BRAND.getParamsKey(),
+                (byte) 0x01,
+                (byte) country
+        };
+    }
+
     public void setWifiEapUsername(String username) {
         byte[] dataBytes = username.getBytes();
         int length = dataBytes.length;
@@ -883,7 +904,7 @@ public class ParamsTask extends OrderTask {
                 byte[] remainBytes = Arrays.copyOfRange(value, 6, 6 + length);
                 dataBytesStr += MokoUtils.bytesToHexString(remainBytes);
             } else {
-                if (length == 0){
+                if (length == 0) {
                     data = new byte[5];
                     data[0] = (byte) 0xEE;
                     data[1] = (byte) 0x00;
@@ -949,4 +970,119 @@ public class ParamsTask extends OrderTask {
         }
         MokoSupport.getInstance().sendDirectOrder(this);
     }
+
+    public void setIBeaconEnable(@IntRange(from = 0, to = 1) int enable) {
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_I_BEACON_SWITCH.getParamsKey(),
+                (byte) 0x01,
+                (byte) enable
+        };
+    }
+
+    public void setIBeaconMajor(@IntRange(from = 0, to = 65535) int major) {
+        byte[] bytes = MokoUtils.toByteArray(major, 2);
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_I_BEACON_MAJOR.getParamsKey(),
+                (byte) 0x02,
+                bytes[0],
+                bytes[1]
+        };
+    }
+
+    public void setIBeaconMinor(@IntRange(from = 0, to = 65535) int minor) {
+        byte[] bytes = MokoUtils.toByteArray(minor, 2);
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_I_BEACON_MINOR.getParamsKey(),
+                (byte) 0x02,
+                bytes[0],
+                bytes[1]
+        };
+    }
+
+    public void setIBeaconUuid(String uuid) {
+        byte[] uuidBytes = MokoUtils.hex2bytes(uuid);
+        int length = uuidBytes.length;
+        data = new byte[length + 4];
+        data[0] = (byte) 0xED;
+        data[1] = (byte) 0x01;
+        data[2] = (byte) ParamsKeyEnum.KEY_I_BEACON_UUID.getParamsKey();
+        data[3] = (byte) length;
+        for (int i = 0; i < uuidBytes.length; i++) {
+            data[i + 4] = uuidBytes[i];
+        }
+        response.responseValue = data;
+    }
+
+    public void setIBeaconAdInterval(@IntRange(from = 1, to = 100) int interval) {
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_I_BEACON_AD_INTERVAL.getParamsKey(),
+                (byte) 0x01,
+                (byte) interval
+        };
+    }
+
+    public void setIBeaconTxPower(@IntRange(from = 0, to = 15) int txPower) {
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_I_BEACON_TX_POWER.getParamsKey(),
+                (byte) 0x01,
+                (byte) txPower
+        };
+    }
+
+    public void setMeteringReportEnable(@IntRange(from = 0, to = 1) int enable) {
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_METERING_REPORT_ENABLE.getParamsKey(),
+                (byte) 0x01,
+                (byte) enable
+        };
+    }
+
+    public void setPowerReportInterval(@IntRange(from = 1, to = 86400) int interval) {
+        byte[] bytes = MokoUtils.toByteArray(interval, 4);
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_POWER_REPORT_INTERVAL.getParamsKey(),
+                (byte) 0x04,
+                bytes[0],
+                bytes[1],
+                bytes[2],
+                bytes[3]
+        };
+    }
+
+    public void setEnergyReportInterval(@IntRange(from = 1, to = 1440) int interval) {
+        byte[] bytes = MokoUtils.toByteArray(interval, 2);
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_ENERGY_REPORT_INTERVAL.getParamsKey(),
+                (byte) 0x02,
+                bytes[0],
+                bytes[1]
+        };
+    }
+
+    public void setLoadDetectionNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_LOAD_DETECTION_NOTIFY_ENABLE.getParamsKey(),
+                (byte) 0x01,
+                (byte) enable
+        };
+    }
+
 }

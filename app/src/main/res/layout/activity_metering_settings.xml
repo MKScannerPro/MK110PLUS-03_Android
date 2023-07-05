@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_f2f2f2"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@color/blue_0188cc">
+
+        <TextView
+            android:id="@+id/tv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:drawableLeft="@drawable/back"
+            android:drawablePadding="6dp"
+            android:gravity="center_vertical"
+            android:onClick="onBack"
+            android:paddingLeft="16dp"
+            android:textColor="@color/white_ffffff"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Metering Settings"
+            android:textColor="@color/white_ffffff"
+            android:textSize="17sp" />
+
+        <ImageView
+            android:id="@+id/iv_save"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:clickable="true"
+            android:onClick="onSave"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:src="@drawable/ic_save" />
+    </RelativeLayout>
+
+    <CheckBox
+        android:id="@+id/cbMetering"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:button="@null"
+        android:drawableRight="@drawable/selector_cb_btn"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="Metering switch"
+        android:textColor="@color/black_333333"
+        android:textSize="15sp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutMetering"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:visibility="gone">
+
+        <CheckBox
+            android:id="@+id/cbDetectionNotify"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:button="@null"
+            android:checked="true"
+            android:drawableRight="@drawable/selector_cb_btn"
+            android:text="Load detection notification"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvPowerInterval"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="Power reporting interval"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cbDetectionNotify" />
+
+        <EditText
+            android:id="@+id/etPowerInterval"
+            android:layout_width="0px"
+            android:layout_height="0px"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@color/white_ffffff"
+            android:hint="1-86400"
+            android:inputType="number"
+            android:maxLength="5"
+            android:paddingStart="10dp"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvPowerInterval"
+            app:layout_constraintLeft_toRightOf="@+id/tvPowerInterval"
+            app:layout_constraintRight_toLeftOf="@+id/tvPowerIntervalUnit"
+            app:layout_constraintTop_toTopOf="@+id/tvPowerInterval" />
+
+        <TextView
+            android:id="@+id/tvPowerIntervalUnit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="second"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvPowerInterval"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvPowerInterval" />
+
+        <TextView
+            android:id="@+id/tvEnergyInterval"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:text="Energy reporting interval"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvPowerInterval" />
+
+        <EditText
+            android:id="@+id/etEnergyInterval"
+            android:layout_width="0px"
+            android:layout_height="0px"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@color/white_ffffff"
+            android:hint="1-1440"
+            android:inputType="number"
+            android:maxLength="4"
+            android:paddingStart="10dp"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvEnergyInterval"
+            app:layout_constraintLeft_toRightOf="@+id/tvEnergyInterval"
+            app:layout_constraintRight_toLeftOf="@+id/tvEnergyIntervalUnit"
+            app:layout_constraintTop_toTopOf="@+id/tvEnergyInterval" />
+
+        <TextView
+            android:id="@+id/tvEnergyIntervalUnit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="minute"
+            android:textColor="@color/black_333333"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvEnergyInterval"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvEnergyInterval" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

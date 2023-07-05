@@ -218,6 +218,14 @@ public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBindi
         MokoSupport.getInstance().disConnectBle();
     }
 
+    public void onAdvertiseIBeacon(View view){
+        if (isWindowLocked()) return;
+        startActivity(new Intent(this, AdvertiseIBeaconActivity.class));
+    }
+
+    public void onMeteringSettings(View view){
+
+    }
 
     public void onWifiSettings(View view) {
         if (isWindowLocked()) return;
