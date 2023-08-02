@@ -454,7 +454,7 @@
                     android:minHeight="40dp"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
-                    android:text="United States of America"
+                    tools:text="United States of America"
                     android:textColor="@color/white_ffffff"
                     android:textSize="15sp" />
             </LinearLayout>

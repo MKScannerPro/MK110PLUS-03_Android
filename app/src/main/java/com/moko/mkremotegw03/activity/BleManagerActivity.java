@@ -49,11 +49,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class BleManagerActivity extends BaseActivity<ActivityBleDevicesBinding> implements BaseQuickAdapter.OnItemChildClickListener {
-
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-
     private BleDeviceAdapter mAdapter;
     private ArrayList<BleDevice> mBleDevices;
     private ConcurrentHashMap<String, BleDevice> mBleDevicesMap;
@@ -83,9 +81,7 @@ public class BleManagerActivity extends BaseActivity<ActivityBleDevicesBinding> 
     private void refreshList() {
         new Thread(() -> {
             while (refreshFlag) {
-                runOnUiThread(() -> {
-                    mAdapter.replaceData(mBleDevices);
-                });
+                runOnUiThread(() -> mAdapter.replaceData(mBleDevices));
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -123,12 +119,10 @@ public class BleManagerActivity extends BaseActivity<ActivityBleDevicesBinding> 
                 Type type = new TypeToken<MsgNotify<List<BleDevice>>>() {
                 }.getType();
                 MsgNotify<List<BleDevice>> result = new Gson().fromJson(message, type);
-                if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                    return;
+                if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
                 List<BleDevice> bleDevices = result.data;
                 for (BleDevice device : bleDevices) {
-                    if (device.rssi < filterRssi)
-                        continue;
+                    if (device.rssi < filterRssi) continue;
                     if (!mBleDevicesMap.containsKey(device.mac)) {
                         device.index = mIndex++;
                         mBleDevicesMap.put(device.mac, device);

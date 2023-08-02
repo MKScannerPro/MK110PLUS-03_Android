@@ -80,13 +80,11 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
         dialog.setMessage("After reset, energy data will be deleted, please confirm again whether to reset it？");
         dialog.setTitle("Reset Energy Data");
         dialog.setOnAlertConfirmListener(() -> {
-            mHandler.postDelayed(() -> {
-                dismissLoadingProgressDialog();
-                finish();
-            }, 30 * 1000);
+            mHandler.postDelayed(this::dismissLoadingProgressDialog, 30 * 1000);
             showLoadingProgressDialog();
             int msgId = MQTTConstants.CONFIG_MSG_ID_RESET_ENERGY_DATA;
-            String message = assembleWriteCommonData(msgId, mMokoDevice.mac, null);
+            //这里不能直接传null
+            String message = assembleWriteCommonData(msgId, mMokoDevice.mac, new JsonObject());
             try {
                 MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
             } catch (MqttException e) {
@@ -99,7 +97,6 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTMessageArrivedEvent(MQTTMessageArrivedEvent event) {
         // 更新所有设备的网络状态
-        final String topic = event.getTopic();
         final String message = event.getMessage();
         if (TextUtils.isEmpty(message))
             return;
@@ -158,8 +155,15 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
             if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
-            getPowerMeteringData();
-            getEnergyData();
+            if (result.result_code == 0) {
+                getPowerMeteringData();
+                getEnergyData();
+                ToastUtils.showToast(this, "Set up succeed");
+            } else {
+                ToastUtils.showToast(this, "Set up failed");
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
+            }
         }
     }
 
@@ -196,5 +200,9 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
         } catch (MqttException e) {
             e.printStackTrace();
         }
+    }
+
+    public void back(View view) {
+        finish();
     }
 }

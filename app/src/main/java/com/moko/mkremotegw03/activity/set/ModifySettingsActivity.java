@@ -62,7 +62,7 @@ public class ModifySettingsActivity extends BaseActivity<ActivityModifySettingsB
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        mBind.tvName.postDelayed(() -> getMqttSettings(), 1000);
+        mBind.tvName.postDelayed(this::getMqttSettings, 1000);
     }
 
     @Override
@@ -90,8 +90,7 @@ public class ModifySettingsActivity extends BaseActivity<ActivityModifySettingsB
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             mqttDeviceConfig.host = result.data.get("host").getAsString();

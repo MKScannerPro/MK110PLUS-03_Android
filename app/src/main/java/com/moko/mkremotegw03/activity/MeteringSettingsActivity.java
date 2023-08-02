@@ -56,7 +56,6 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
     public Handler mHandler;
-    private boolean isMeteringSwitch;
 
     @Override
     protected ActivityMeteringSettingsBinding getViewBinding() {
@@ -81,9 +80,10 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
             appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
             mAppTopic = TextUtils.isEmpty(appMqttConfig.topicPublish) ? mMokoDevice.topicSubscribe : appMqttConfig.topicPublish;
             mHandler = new Handler(Looper.getMainLooper());
-            isMeteringSwitch = getIntent().getBooleanExtra("enable", false);
+            boolean isMeteringSwitch = getIntent().getBooleanExtra("enable", false);
             mBind.cbMetering.setChecked(isMeteringSwitch);
-            if (isMeteringSwitch) getLoadState();
+            mBind.layoutMetering.setVisibility(isMeteringSwitch ? View.VISIBLE : View.GONE);
+            getLoadState();
         }
         mBind.cbMetering.setOnCheckedChangeListener((buttonView, isChecked) -> mBind.layoutMetering.setVisibility(isChecked ? View.VISIBLE : View.GONE));
         mBind.cbDetectionNotify.setOnCheckedChangeListener((buttonView, isChecked) -> mBind.group.setVisibility(isChecked ? View.VISIBLE : View.GONE));
@@ -139,7 +139,7 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
 
                                 case KEY_LOAD_DETECTION_NOTIFY_ENABLE:
                                     loadDetectionNotifySuc = result == 1;
-                                    if (!mBind.cbDetectionNotify.isChecked()){
+                                    if (!mBind.cbDetectionNotify.isChecked()) {
                                         if (result == 1) {
                                             ToastUtils.showToast(this, "Setup succeed！");
                                         } else {
@@ -233,10 +233,8 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
             }
             mBind.cbDetectionNotify.setChecked(enable == 1);
             mBind.group.setVisibility(enable == 1 ? View.VISIBLE : View.GONE);
-            if (enable == 1) {
-                getPowerReportInterval();
-                getEnergyReportInterval();
-            }
+            getPowerReportInterval();
+            getEnergyReportInterval();
         }
         if (msg_id == MQTTConstants.READ_MSG_ID_POWER_REPORT_INTERVAL || msg_id == MQTTConstants.READ_MSG_ID_ENERGY_REPORT_INTERVAL) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
@@ -295,20 +293,20 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
                 }
             }
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_POWER_REPORT_INTERVAL){
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_POWER_REPORT_INTERVAL) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
             if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
-            if (result.result_code == 0){
+            if (result.result_code == 0) {
                 setPowerEnergyReportInterval(MQTTConstants.CONFIG_MSG_ID_ENERGY_REPORT_INTERVAL, Integer.parseInt(mBind.etEnergyInterval.getText().toString()));
-            }else {
+            } else {
                 ToastUtils.showToast(this, "Set up failed");
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
             }
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_ENERGY_REPORT_INTERVAL){
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_ENERGY_REPORT_INTERVAL) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -341,7 +339,7 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
     }
 
     private void getEnergyReportInterval() {
-        int msgId = MQTTConstants.READ_MSG_ID_POWER_REPORT_INTERVAL;
+        int msgId = MQTTConstants.READ_MSG_ID_ENERGY_REPORT_INTERVAL;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);

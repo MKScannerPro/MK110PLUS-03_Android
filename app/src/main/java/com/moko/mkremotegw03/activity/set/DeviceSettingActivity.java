@@ -129,7 +129,7 @@ public class DeviceSettingActivity extends BaseActivity<ActivityDeviceSettingRem
                     mBind.imgOutputSwitch.setImageResource(isOutputSwitch ? R.drawable.checkbox_open : R.drawable.checkbox_close);
                 } else {
                     isOutputControl = !isOutputControl;
-                    mBind.imgOutputControl.setImageResource(isOutputSwitch ? R.drawable.checkbox_open : R.drawable.checkbox_close);
+                    mBind.imgOutputControl.setImageResource(isOutputControl ? R.drawable.checkbox_open : R.drawable.checkbox_close);
                 }
                 ToastUtils.showToast(this, "Set up succeed");
             } else {

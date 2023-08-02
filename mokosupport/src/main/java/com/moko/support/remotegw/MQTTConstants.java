@@ -70,8 +70,8 @@ public class MQTTConstants {
     public static final int READ_MSG_ID_COMMUNICATION_TIMEOUT = 2010;
     public static final int READ_MSG_ID_INDICATOR_STATUS = 2011;
     public static final int READ_MSG_ID_DEVICE_STATUS = 2012;
-    public static final int READ_MSG_ID_OUTPUT_SWITCH = 1015;
-    public static final int READ_MSG_ID_OUTPUT_CONTROL = 1016;
+    public static final int READ_MSG_ID_OUTPUT_SWITCH = 2015;
+    public static final int READ_MSG_ID_OUTPUT_CONTROL = 2016;
     public static final int READ_MSG_ID_WIFI_SETTINGS = 2020;
     public static final int READ_MSG_ID_NETWORK_SETTINGS = 2023;
     public static final int READ_MSG_ID_MQTT_SETTINGS = 2030;

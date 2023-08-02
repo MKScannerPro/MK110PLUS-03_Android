@@ -158,8 +158,7 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
             Type type = new TypeToken<MsgReadResult<BleConnectedList>>() {
             }.getType();
             MsgReadResult<BleConnectedList> result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             if (result.data.ble_conn_list != null && !result.data.ble_conn_list.isEmpty()) {
@@ -255,8 +254,7 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceOnlineEvent(DeviceOnlineEvent event) {
         String mac = event.getMac();
-        if (!mMokoDevice.mac.equals(mac))
-            return;
+        if (!mMokoDevice.mac.equals(mac)) return;
         boolean online = event.isOnline();
         if (!online) {
             ToastUtils.showToast(this, "device is off-line");
@@ -269,8 +267,7 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
     }
 
     public void onDeviceSetting(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
@@ -292,8 +289,7 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
     }
 
     public void onScannerOptionSetting(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         // 获取扫描过滤
         if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
@@ -305,8 +301,7 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
     }
 
     public void onScanSwitch(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         // 切换扫描开关
         if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
@@ -329,8 +324,7 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
     }
 
     public void onManageBleDevices(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         // 设置扫描间隔
         if (!MQTTSupport.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
