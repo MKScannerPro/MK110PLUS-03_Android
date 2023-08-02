@@ -1,7 +1,5 @@
 package com.moko.support.remotegw;
 
-import android.os.StatFs;
-
 public class MQTTConstants {
     // CONFIG
     public static final int CONFIG_MSG_ID_REBOOT = 1000;
@@ -39,8 +37,9 @@ public class MQTTConstants {
     public static final int CONFIG_MSG_ID_FILTER_OTHER = 1056;
     public static final int CONFIG_MSG_ID_DUPLICATE_DATA_FILTER = 1057;
     public static final int CONFIG_MSG_ID_DATA_REPORT_TIMEOUT = 1058;
-    public static final int CONFIG_MSG_ID_UPLOAD_DATA_OPTION= 1059;
-    public static final int CONFIG_MSG_ID_BEACON_PARAMS= 1061;
+    public static final int CONFIG_MSG_ID_UPLOAD_DATA_OPTION = 1059;
+    public static final int CONFIG_MSG_ID_FILTER_PHY = 1060;
+    public static final int CONFIG_MSG_ID_BEACON_PARAMS = 1061;
     public static final int CONFIG_MSG_ID_BLE_BXP_BUTTON_CONNECT = 1100;
     public static final int CONFIG_MSG_ID_BLE_BXP_BUTTON_INFO = 1102;
     public static final int CONFIG_MSG_ID_BLE_BXP_BUTTON_STATUS = 1104;
@@ -92,7 +91,8 @@ public class MQTTConstants {
     public static final int READ_MSG_ID_DUPLICATE_DATA_FILTER = 2057;
     public static final int READ_MSG_ID_DATA_REPORT_TIMEOUT = 2058;
     public static final int READ_MSG_ID_UPLOAD_DATA_OPTION = 2059;
-    public static final int READ_MSG_ID_BEACON_PARAMS= 2061;
+    public static final int READ_MSG_ID_FILTER_PHY = 2060;
+    public static final int READ_MSG_ID_BEACON_PARAMS = 2061;
     public static final int READ_MSG_ID_BLE_CONNECTED_LIST = 2201;
     //powerMetering
     public static final int READ_MSG_ID_POWER_METERING_ENABLE = 2080;
