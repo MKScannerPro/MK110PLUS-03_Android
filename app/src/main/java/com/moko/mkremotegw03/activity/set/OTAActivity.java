@@ -15,6 +15,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityOtaRemoteBinding;
+import com.moko.mkremotegw03.dialog.BottomDialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -31,14 +32,17 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
     private final String FILTER_ASCII = "[ -~]*";
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-
     private Handler mHandler;
+    private final String[] otaTypeArr = {"WIFI firmware", "Bluetooth firmware"};
+    private int otaType;
 
     @Override
     protected void onCreate() {
@@ -54,6 +58,7 @@ public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mAppTopic = TextUtils.isEmpty(appMqttConfig.topicPublish) ? mMokoDevice.topicSubscribe : appMqttConfig.topicPublish;
         mHandler = new Handler(Looper.getMainLooper());
+        mBind.tvOtaType.setOnClickListener(v -> selectOtaType());
     }
 
     @Override
@@ -66,8 +71,7 @@ public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
         // 更新所有设备的网络状态
         final String topic = event.getTopic();
         final String message = event.getMessage();
-        if (TextUtils.isEmpty(message))
-            return;
+        if (TextUtils.isEmpty(message)) return;
         int msg_id;
         try {
             JsonObject object = new Gson().fromJson(message, JsonObject.class);
@@ -81,8 +85,7 @@ public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
             Type type = new TypeToken<MsgNotify<JsonObject>>() {
             }.getType();
             MsgNotify<JsonObject> result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             int status = result.data.get("status").getAsInt();
@@ -97,14 +100,13 @@ public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
                 ToastUtils.showToast(this, "Set up failed");
             }, 50 * 1000);
             showLoadingProgressDialog();
-            setOTA(firmwareFileUrlStr);
+            setOTA(firmwareFileUrlStr, otaType == 0 ? MQTTConstants.CONFIG_MSG_ID_OTA : MQTTConstants.CONFIG_MSG_ID_OTA_BLE);
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA_RESULT) {
+        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA_RESULT || msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA_BLE_RESULT) {
             Type type = new TypeToken<MsgNotify<JsonObject>>() {
             }.getType();
             MsgNotify<JsonObject> result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             int resultCode = result.data.get("result_code").getAsInt();
@@ -114,12 +116,11 @@ public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
                 ToastUtils.showToast(this, R.string.update_failed);
             }
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_OTA) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_OTA || msg_id == MQTTConstants.CONFIG_MSG_ID_OTA_BLE) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
 //            dismissLoadingProgressDialog();
 //            mHandler.removeMessages(0);
             if (result.result_code == 0) {
@@ -133,6 +134,17 @@ public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceOnlineEvent(DeviceOnlineEvent event) {
         super.offline(event, mMokoDevice.mac);
+    }
+
+    private void selectOtaType() {
+        if (isWindowLocked()) return;
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(new ArrayList<>(Arrays.asList(otaTypeArr)), otaType);
+        dialog.setListener(value -> {
+            otaType = value;
+            mBind.tvOtaType.setText(otaTypeArr[value]);
+        });
+        dialog.show(getSupportFragmentManager());
     }
 
     public void onBack(View view) {
@@ -169,8 +181,7 @@ public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
         }
     }
 
-    private void setOTA(String firmwareFileUrlStr) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_OTA;
+    private void setOTA(String firmwareFileUrlStr, int msgId) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("firmware_url", firmwareFileUrlStr);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);

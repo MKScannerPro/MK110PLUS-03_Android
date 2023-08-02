@@ -167,7 +167,7 @@ public class ScannerUploadOptionActivity extends BaseActivity<ActivityScannerUpl
     private void onFilterPhyClick() {
         if (isWindowLocked()) return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas((ArrayList<String>) (Arrays.asList(phyArr)), phySelected);
+        dialog.setDatas(new ArrayList<>(Arrays.asList(phyArr)), phySelected);
         dialog.setListener(value -> {
             phySelected = value;
             mBind.tvFilterPhy.setText(phyArr[value]);

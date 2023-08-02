@@ -62,13 +62,11 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class RemoteMainActivity extends BaseActivity<ActivityMainRemoteBinding> implements BaseQuickAdapter.OnItemClickListener, BaseQuickAdapter.OnItemLongClickListener {
-
     private ArrayList<MokoDevice> devices;
     private DeviceAdapter adapter;
     public Handler mHandler;
     public String mAppMqttConfigStr;
     private MQTTConfig mAppMqttConfig;
-
     public static String PATH_LOGCAT;
 
     @Override

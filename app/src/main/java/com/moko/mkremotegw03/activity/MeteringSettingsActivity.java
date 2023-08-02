@@ -139,6 +139,13 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
 
                                 case KEY_LOAD_DETECTION_NOTIFY_ENABLE:
                                     loadDetectionNotifySuc = result == 1;
+                                    if (!mBind.cbDetectionNotify.isChecked()){
+                                        if (result == 1) {
+                                            ToastUtils.showToast(this, "Setup succeed！");
+                                        } else {
+                                            ToastUtils.showToast(this, "Setup failed！");
+                                        }
+                                    }
                                     break;
 
                                 case KEY_POWER_REPORT_INTERVAL:

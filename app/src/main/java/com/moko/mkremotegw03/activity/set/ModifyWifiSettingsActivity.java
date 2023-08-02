@@ -228,7 +228,7 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
     private void onSelectCountry() {
         if (isWindowLocked()) return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas((ArrayList<String>) (Arrays.asList(countryBrand)), countrySelected);
+        dialog.setDatas(new ArrayList<>(Arrays.asList(countryBrand)), countrySelected);
         dialog.setListener(value -> {
             countrySelected = value;
             mBind.tvCountryBrand.setText(countryBrand[value]);

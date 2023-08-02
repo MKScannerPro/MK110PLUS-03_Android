@@ -55,21 +55,15 @@ import androidx.viewpager2.widget.ViewPager2;
 
 public class MqttSettingsActivity extends BaseActivity<ActivityMqttDeviceRemoteBinding> implements RadioGroup.OnCheckedChangeListener {
     private final String FILTER_ASCII = "[ -~]*";
-
     private GeneralDeviceFragment generalFragment;
     private UserDeviceFragment userFragment;
     private SSLDeviceFragment sslFragment;
     private LWTFragment lwtFragment;
     private MQTTFragmentAdapter adapter;
     private ArrayList<Fragment> fragments;
-
     private MQTTConfig mqttDeviceConfig;
-
     private boolean mSavedParamsError;
     private boolean mIsSaved;
-
-    private InputFilter filter;
-
     private String expertFilePath;
     private boolean isFileError;
     private String mStaMac;
@@ -79,11 +73,10 @@ public class MqttSettingsActivity extends BaseActivity<ActivityMqttDeviceRemoteB
     @Override
     protected void onCreate() {
         mqttDeviceConfig = new MQTTConfig();
-        filter = (source, start, end, dest, dstart, dend) -> {
+        InputFilter filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
             }
-
             return null;
         };
         mBind.etMqttHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), filter});

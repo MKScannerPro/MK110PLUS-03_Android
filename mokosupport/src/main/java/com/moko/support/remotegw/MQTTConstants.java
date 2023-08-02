@@ -14,6 +14,7 @@ public class MQTTConstants {
     public static final int CONFIG_MSG_ID_RESET = 1013;
     public static final int CONFIG_MSG_ID_OUTPUT_SWITCH = 1015;
     public static final int CONFIG_MSG_ID_OUTPUT_CONTROL = 1016;
+    public static final int CONFIG_MSG_ID_OTA_BLE = 1017;
     public static final int CONFIG_MSG_ID_WIFI_SETTINGS = 1020;
     public static final int CONFIG_MSG_ID_WIFI_CERT_FILE = 1021;
     public static final int CONFIG_MSG_ID_NETWORK_SETTINGS = 1023;
@@ -107,6 +108,7 @@ public class MQTTConstants {
     public static final int NOTIFY_MSG_ID_NETWORKING_STATUS = 3004;
     public static final int NOTIFY_MSG_ID_OTA_RESULT = 3007;
     public static final int NOTIFY_MSG_ID_BUTTON_RESET = 3014;
+    public static final int NOTIFY_MSG_ID_OTA_BLE_RESULT = 3018;
     public static final int NOTIFY_MSG_ID_WIFI_CERT_RESULT = 3022;
     public static final int NOTIFY_MSG_ID_MQTT_CERT_RESULT = 3032;
     public static final int NOTIFY_MSG_ID_BLE_SCAN_RESULT = 3070;

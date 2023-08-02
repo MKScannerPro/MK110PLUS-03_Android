@@ -75,71 +75,68 @@ public class NetworkSettingsActivity extends BaseActivity<ActivityNetworkSetting
             OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
             int responseType = response.responseType;
             byte[] value = response.responseValue;
-            switch (orderCHAR) {
-                case CHAR_PARAMS:
-                    if (value.length >= 4) {
-                        int header = value[0] & 0xFF;// 0xED
-                        int flag = value[1] & 0xFF;// read or write
-                        int cmd = value[2] & 0xFF;
-                        if (header == 0xED) {
-                            ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
-                            if (configKeyEnum == null) {
-                                return;
+            if (orderCHAR == OrderCHAR.CHAR_PARAMS) {
+                if (value.length >= 4) {
+                    int header = value[0] & 0xFF;// 0xED
+                    int flag = value[1] & 0xFF;// read or write
+                    int cmd = value[2] & 0xFF;
+                    if (header == 0xED) {
+                        ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
+                        if (configKeyEnum == null) {
+                            return;
+                        }
+                        int length = value[3] & 0xFF;
+                        if (flag == 0x01) {
+                            // write
+                            int result = value[4] & 0xFF;
+                            switch (configKeyEnum) {
+                                case KEY_NETWORK_IP_INFO:
+                                    if (result != 1) {
+                                        mSavedParamsError = true;
+                                    }
+                                    break;
+                                case KEY_NETWORK_DHCP:
+                                    if (result != 1) {
+                                        mSavedParamsError = true;
+                                    }
+                                    if (mSavedParamsError) {
+                                        ToastUtils.showToast(this, "Setup failed！");
+                                    } else {
+                                        ToastUtils.showToast(this, "Setup succeed！");
+                                    }
+                                    break;
                             }
-                            int length = value[3] & 0xFF;
-                            if (flag == 0x01) {
-                                // write
-                                int result = value[4] & 0xFF;
-                                switch (configKeyEnum) {
-                                    case KEY_NETWORK_IP_INFO:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        break;
-                                    case KEY_NETWORK_DHCP:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        if (mSavedParamsError) {
-                                            ToastUtils.showToast(this, "Setup failed！");
-                                        } else {
-                                            ToastUtils.showToast(this, "Setup succeed！");
-                                        }
-                                        break;
-                                }
-                            }
-                            if (flag == 0x00) {
-                                if (length == 0)
-                                    return;
-                                // read
-                                switch (configKeyEnum) {
-                                    case KEY_NETWORK_DHCP:
-                                        int enable = value[4];
-                                        mBind.cbDhcp.setChecked(enable == 1);
-                                        mBind.clIp.setVisibility(enable == 1 ? View.GONE : View.VISIBLE);
-                                        break;
-                                    case KEY_NETWORK_IP_INFO:
-                                        if (length == 16) {
-                                            String ip = String.format(Locale.getDefault(), "%d.%d.%d.%d",
-                                                    value[4] & 0xFF, value[5] & 0xFF, value[6] & 0xFF, value[7] & 0xFF);
-                                            String mask = String.format(Locale.getDefault(), "%d.%d.%d.%d",
-                                                    value[8] & 0xFF, value[9] & 0xFF, value[10] & 0xFF, value[11] & 0xFF);
-                                            String gateway = String.format(Locale.getDefault(), "%d.%d.%d.%d",
-                                                    value[12] & 0xFF, value[13] & 0xFF, value[14] & 0xFF, value[15] & 0xFF);
-                                            String dns = String.format(Locale.getDefault(), "%d.%d.%d.%d",
-                                                    value[16] & 0xFF, value[17] & 0xFF, value[18] & 0xFF, value[19] & 0xFF);
-                                            mBind.etIp.setText(ip);
-                                            mBind.etMask.setText(mask);
-                                            mBind.etGateway.setText(gateway);
-                                            mBind.etDns.setText(dns);
-                                        }
-                                        break;
+                        }
+                        if (flag == 0x00) {
+                            if (length == 0) return;
+                            // read
+                            switch (configKeyEnum) {
+                                case KEY_NETWORK_DHCP:
+                                    int enable = value[4];
+                                    mBind.cbDhcp.setChecked(enable == 1);
+                                    mBind.clIp.setVisibility(enable == 1 ? View.GONE : View.VISIBLE);
+                                    break;
+                                case KEY_NETWORK_IP_INFO:
+                                    if (length == 16) {
+                                        String ip = String.format(Locale.getDefault(), "%d.%d.%d.%d",
+                                                value[4] & 0xFF, value[5] & 0xFF, value[6] & 0xFF, value[7] & 0xFF);
+                                        String mask = String.format(Locale.getDefault(), "%d.%d.%d.%d",
+                                                value[8] & 0xFF, value[9] & 0xFF, value[10] & 0xFF, value[11] & 0xFF);
+                                        String gateway = String.format(Locale.getDefault(), "%d.%d.%d.%d",
+                                                value[12] & 0xFF, value[13] & 0xFF, value[14] & 0xFF, value[15] & 0xFF);
+                                        String dns = String.format(Locale.getDefault(), "%d.%d.%d.%d",
+                                                value[16] & 0xFF, value[17] & 0xFF, value[18] & 0xFF, value[19] & 0xFF);
+                                        mBind.etIp.setText(ip);
+                                        mBind.etMask.setText(mask);
+                                        mBind.etGateway.setText(gateway);
+                                        mBind.etDns.setText(dns);
+                                    }
+                                    break;
 
-                                }
                             }
                         }
                     }
-                    break;
+                }
             }
         }
     }
