@@ -1,4 +1,4 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.filter;
 
 import android.os.Handler;
 import android.os.Looper;

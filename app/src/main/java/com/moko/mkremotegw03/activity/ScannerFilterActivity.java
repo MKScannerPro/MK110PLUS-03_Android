@@ -88,102 +88,96 @@ public class ScannerFilterActivity extends BaseActivity<ActivityScannerFilterBin
             OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
             int responseType = response.responseType;
             byte[] value = response.responseValue;
-            switch (orderCHAR) {
-                case CHAR_PARAMS:
-                    if (value.length >= 4) {
-                        int header = value[0] & 0xFF;// 0xED or 0xEE
-                        int flag = value[1] & 0xFF;// read or write
-                        int cmd = value[2] & 0xFF;
-                        if (header == 0xEE) {
-                            ParamsLongKeyEnum configKeyEnum = ParamsLongKeyEnum.fromParamKey(cmd);
-                            if (configKeyEnum == null) {
-                                return;
-                            }
-                            if (flag == 0x01) {
-                                // write
-                                int result = value[4] & 0xFF;
-                                switch (configKeyEnum) {
-                                    case KEY_FILTER_NAME_RULES:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        break;
-                                }
-                            }
-                            if (flag == 0x00) {
-                                int length = MokoUtils.toInt(Arrays.copyOfRange(value, 3, 5));
-                                // read
-                                switch (configKeyEnum) {
-                                    case KEY_FILTER_NAME_RULES:
-                                        if (length > 0) {
-                                            filterAdvName.clear();
-                                            byte[] advNameBytes = Arrays.copyOfRange(value, 5, 5 + length);
-                                            for (int i = 0, l = advNameBytes.length; i < l; ) {
-                                                int advNameLength = advNameBytes[i] & 0xFF;
-                                                i++;
-                                                filterAdvName.add(new String(Arrays.copyOfRange(advNameBytes, i, i + advNameLength)));
-                                                i += advNameLength;
-                                            }
-                                            mBind.etAdvName.setText(filterAdvName.get(0));
-                                        }
-                                        break;
+            if (orderCHAR == OrderCHAR.CHAR_PARAMS) {
+                if (value.length >= 4) {
+                    int header = value[0] & 0xFF;// 0xED or 0xEE
+                    int flag = value[1] & 0xFF;// read or write
+                    int cmd = value[2] & 0xFF;
+                    if (header == 0xEE) {
+                        ParamsLongKeyEnum configKeyEnum = ParamsLongKeyEnum.fromParamKey(cmd);
+                        if (configKeyEnum == null) {
+                            return;
+                        }
+                        if (flag == 0x01) {
+                            // write
+                            int result = value[4] & 0xFF;
+                            if (configKeyEnum == ParamsLongKeyEnum.KEY_FILTER_NAME_RULES) {
+                                if (result != 1) {
+                                    mSavedParamsError = true;
                                 }
                             }
                         }
-                        if (header == 0xED) {
-                            ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
-                            if (configKeyEnum == null) {
-                                return;
-                            }
-                            int length = value[3] & 0xFF;
-                            if (flag == 0x01) {
-                                // write
-                                int result = value[4] & 0xFF;
-                                switch (configKeyEnum) {
-                                    case KEY_FILTER_MAC_RULES:
-                                    case KEY_FILTER_RELATIONSHIP:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        break;
-                                    case KEY_FILTER_RSSI:
-                                        if (result != 1) {
-                                            mSavedParamsError = true;
-                                        }
-                                        if (mSavedParamsError) {
-                                            ToastUtils.showToast(this, "Setup failed！");
-                                        } else {
-                                            ToastUtils.showToast(this, "Setup succeed！");
-                                        }
-                                        break;
-                                }
-                            }
-                            if (flag == 0x00) {
-                                if (length == 0)
-                                    return;
-                                // read
-                                switch (configKeyEnum) {
-                                    case KEY_FILTER_RSSI:
-                                        int progress = value[4] + 127;
-                                        mBind.sbRssiFilter.setProgress(progress);
-                                        break;
-                                    case KEY_FILTER_MAC_RULES:
-                                        filterMacAddress.clear();
-                                        byte[] macBytes = Arrays.copyOfRange(value, 4, 4 + length);
-                                        for (int i = 0, l = macBytes.length; i < l; ) {
-                                            int macLength = macBytes[i] & 0xFF;
-                                            i++;
-                                            filterMacAddress.add(MokoUtils.bytesToHexString(Arrays.copyOfRange(macBytes, i, i + macLength)));
-                                            i += macLength;
-                                        }
-                                        mBind.etMacAddress.setText(filterMacAddress.get(0));
-                                        break;
-
+                        if (flag == 0x00) {
+                            int length = MokoUtils.toInt(Arrays.copyOfRange(value, 3, 5));
+                            // read
+                            if (configKeyEnum == ParamsLongKeyEnum.KEY_FILTER_NAME_RULES) {
+                                if (length > 0) {
+                                    filterAdvName.clear();
+                                    byte[] advNameBytes = Arrays.copyOfRange(value, 5, 5 + length);
+                                    for (int i = 0, l = advNameBytes.length; i < l; ) {
+                                        int advNameLength = advNameBytes[i] & 0xFF;
+                                        i++;
+                                        filterAdvName.add(new String(Arrays.copyOfRange(advNameBytes, i, i + advNameLength)));
+                                        i += advNameLength;
+                                    }
+                                    mBind.etAdvName.setText(filterAdvName.get(0));
                                 }
                             }
                         }
                     }
-                    break;
+                    if (header == 0xED) {
+                        ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
+                        if (configKeyEnum == null) {
+                            return;
+                        }
+                        int length = value[3] & 0xFF;
+                        if (flag == 0x01) {
+                            // write
+                            int result = value[4] & 0xFF;
+                            switch (configKeyEnum) {
+                                case KEY_FILTER_MAC_RULES:
+                                case KEY_FILTER_RELATIONSHIP:
+                                    if (result != 1) {
+                                        mSavedParamsError = true;
+                                    }
+                                    break;
+                                case KEY_FILTER_RSSI:
+                                    if (result != 1) {
+                                        mSavedParamsError = true;
+                                    }
+                                    if (mSavedParamsError) {
+                                        ToastUtils.showToast(this, "Setup failed！");
+                                    } else {
+                                        ToastUtils.showToast(this, "Setup succeed！");
+                                    }
+                                    break;
+                            }
+                        }
+                        if (flag == 0x00) {
+                            if (length == 0)
+                                return;
+                            // read
+                            switch (configKeyEnum) {
+                                case KEY_FILTER_RSSI:
+                                    int progress = value[4] + 127;
+                                    mBind.sbRssiFilter.setProgress(progress);
+                                    break;
+                                case KEY_FILTER_MAC_RULES:
+                                    filterMacAddress.clear();
+                                    byte[] macBytes = Arrays.copyOfRange(value, 4, 4 + length);
+                                    for (int i = 0, l = macBytes.length; i < l; ) {
+                                        int macLength = macBytes[i] & 0xFF;
+                                        i++;
+                                        filterMacAddress.add(MokoUtils.bytesToHexString(Arrays.copyOfRange(macBytes, i, i + macLength)));
+                                        i += macLength;
+                                    }
+                                    mBind.etMacAddress.setText(filterMacAddress.get(0));
+                                    break;
+
+                            }
+                        }
+                    }
+                }
             }
         }
     }

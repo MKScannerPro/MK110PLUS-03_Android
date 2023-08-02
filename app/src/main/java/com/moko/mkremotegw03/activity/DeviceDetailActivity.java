@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
+import com.moko.mkremotegw03.activity.set.DeviceSettingActivity;
 import com.moko.mkremotegw03.adapter.ScanDeviceAdapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDetailRemoteBinding;
@@ -280,7 +281,14 @@ public class DeviceDetailActivity extends BaseActivity<ActivityDetailRemoteBindi
     }
 
     public void onPowerMeteringSetting(View view){
-
+        if (isWindowLocked()) return;
+        if (!MQTTSupport.getInstance().isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        Intent i = new Intent(this, PowerMeteringActivity.class);
+        i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mMokoDevice);
+        startActivity(i);
     }
 
     public void onScannerOptionSetting(View view) {

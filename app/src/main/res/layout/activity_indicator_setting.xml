@@ -32,13 +32,11 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:clickable="true"
             android:onClick="onSave"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:src="@drawable/ic_save" />
     </RelativeLayout>
-
 
     <CheckBox
         android:id="@+id/cb_ble_broadcast"

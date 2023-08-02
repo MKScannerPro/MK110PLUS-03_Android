@@ -9,8 +9,11 @@ import com.moko.support.remotegw.entity.ParamsLongKeyEnum;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import androidx.annotation.IntRange;
 
@@ -1085,4 +1088,21 @@ public class ParamsTask extends OrderTask {
         };
     }
 
+    public void setCurrentUtcTime(){
+        Calendar calendar = Calendar.getInstance();
+        TimeZone timeZone = TimeZone.getTimeZone("UTC");
+        calendar.setTimeZone(timeZone);
+        long utcTime = calendar.getTimeInMillis();
+        byte[] timeBytes = ByteBuffer.allocate(8).putLong(utcTime).array();
+        response.responseValue = data = new byte[]{
+                (byte) 0xED,
+                (byte) 0x01,
+                (byte) ParamsKeyEnum.KEY_UTC_TIME.getParamsKey(),
+                (byte) 0x01,
+                timeBytes[4],
+                timeBytes[5],
+                timeBytes[6],
+                timeBytes[7]
+        };
+    }
 }

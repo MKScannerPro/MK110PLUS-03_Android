@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white_ffffff"
     android:minHeight="170dp"
     android:paddingLeft="12dp"
@@ -28,6 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:visibility="gone"
+        tools:visibility="visible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cb_ssl">
@@ -54,7 +56,7 @@
             android:gravity="center"
             android:minWidth="70dp"
             android:onClick="onSelectCertificate"
-            android:padding="12dp"
+            android:padding="10dp"
             android:text="CA signed server certificate"
             android:textColor="@color/white_ffffff"
             android:textSize="15sp"
@@ -69,6 +71,7 @@
             android:minHeight="50dp"
             android:orientation="horizontal"
             android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_certification">
@@ -106,6 +109,7 @@
             android:minHeight="50dp"
             android:orientation="horizontal"
             android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ll_ca">
@@ -143,6 +147,7 @@
             android:minHeight="50dp"
             android:orientation="horizontal"
             android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ll_client_cert">

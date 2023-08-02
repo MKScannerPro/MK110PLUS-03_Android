@@ -1,4 +1,4 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
 
 import android.content.Intent;
 import android.os.Handler;
@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
+import com.moko.mkremotegw03.activity.RemoteMainActivity;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityModifySettingsBinding;
 import com.moko.mkremotegw03.db.DBTools;

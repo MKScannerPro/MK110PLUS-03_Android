@@ -1,29 +1,43 @@
 package com.moko.mkremotegw03.activity;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CompoundButton;
 
-import androidx.activity.ViewTreeOnBackPressedDispatcherOwner;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
+import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityAdvertiseIbeaconBinding;
 import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.entity.MQTTConfig;
+import com.moko.mkremotegw03.entity.MokoDevice;
+import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
+import com.moko.support.remotegw.MQTTConstants;
+import com.moko.support.remotegw.MQTTSupport;
 import com.moko.support.remotegw.MokoSupport;
 import com.moko.support.remotegw.OrderTaskAssembler;
+import com.moko.support.remotegw.entity.MsgConfigResult;
+import com.moko.support.remotegw.entity.MsgReadResult;
 import com.moko.support.remotegw.entity.OrderCHAR;
 import com.moko.support.remotegw.entity.ParamsKeyEnum;
+import com.moko.support.remotegw.event.MQTTMessageArrivedEvent;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +57,15 @@ public class AdvertiseIBeaconActivity extends BaseActivity<ActivityAdvertiseIbea
     private boolean isIBeaconUuidSuc;
     private boolean isIBeaconIntervalSuc;
 
+    private MokoDevice mMokoDevice;
+    private MQTTConfig appMqttConfig;
+    private String mAppTopic;
+    private Handler mHandler;
+    private int major;
+    private int minor;
+    private String uuid;
+    private int advInterval;
+
     @Override
     protected ActivityAdvertiseIbeaconBinding getViewBinding() {
         return ActivityAdvertiseIbeaconBinding.inflate(getLayoutInflater());
@@ -50,17 +73,26 @@ public class AdvertiseIBeaconActivity extends BaseActivity<ActivityAdvertiseIbea
 
     @Override
     protected void onCreate() {
-        showLoadingProgressDialog();
-        mBind.tvTitle.postDelayed(() -> {
-            List<OrderTask> orderTasks = new ArrayList<>(8);
-            orderTasks.add(OrderTaskAssembler.getIBeaconEnable());
-            orderTasks.add(OrderTaskAssembler.getIBeaconMajor());
-            orderTasks.add(OrderTaskAssembler.getIBeaconMinor());
-            orderTasks.add(OrderTaskAssembler.getIBeaconUUid());
-            orderTasks.add(OrderTaskAssembler.getIBeaconAdInterval());
-            orderTasks.add(OrderTaskAssembler.getIBeaconTxPower());
-            MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
-        }, 500);
+        mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+        if (null != mMokoDevice) {
+            String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+            appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+            mAppTopic = TextUtils.isEmpty(appMqttConfig.topicPublish) ? mMokoDevice.topicSubscribe : appMqttConfig.topicPublish;
+            mHandler = new Handler(Looper.getMainLooper());
+            getBeaconParams();
+        } else {
+            showLoadingProgressDialog();
+            mBind.tvTitle.postDelayed(() -> {
+                List<OrderTask> orderTasks = new ArrayList<>(8);
+                orderTasks.add(OrderTaskAssembler.getIBeaconEnable());
+                orderTasks.add(OrderTaskAssembler.getIBeaconMajor());
+                orderTasks.add(OrderTaskAssembler.getIBeaconMinor());
+                orderTasks.add(OrderTaskAssembler.getIBeaconUUid());
+                orderTasks.add(OrderTaskAssembler.getIBeaconAdInterval());
+                orderTasks.add(OrderTaskAssembler.getIBeaconTxPower());
+                MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
+            }, 500);
+        }
         mBind.tvTxPowerVal.setOnClickListener(v -> {
             if (isWindowLocked()) return;
             BottomDialog dialog = new BottomDialog();
@@ -72,6 +104,76 @@ public class AdvertiseIBeaconActivity extends BaseActivity<ActivityAdvertiseIbea
             dialog.show(getSupportFragmentManager());
         });
         mBind.cbIBeacon.setOnCheckedChangeListener((buttonView, isChecked) -> mBind.layoutAdvertise.setVisibility(isChecked ? View.VISIBLE : View.GONE));
+    }
+
+    private void getBeaconParams() {
+        showLoadingProgressDialog();
+        mHandler.postDelayed(() -> {
+            dismissLoadingProgressDialog();
+            finish();
+        }, 30 * 1000);
+        int msgId = MQTTConstants.READ_MSG_ID_BEACON_PARAMS;
+        String message = assembleReadCommon(msgId, mMokoDevice.mac);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTMessageArrivedEvent(MQTTMessageArrivedEvent event) {
+        // 更新所有设备的网络状态
+        final String topic = event.getTopic();
+        final String message = event.getMessage();
+        if (TextUtils.isEmpty(message)) return;
+        int msg_id;
+        try {
+            JsonObject object = new Gson().fromJson(message, JsonObject.class);
+            JsonElement element = object.get("msg_id");
+            msg_id = element.getAsInt();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        if (msg_id == MQTTConstants.READ_MSG_ID_BEACON_PARAMS) {
+            Type type = new TypeToken<MsgReadResult<JsonObject>>() {
+            }.getType();
+            MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            dismissLoadingProgressDialog();
+            mHandler.removeMessages(0);
+            int enable = result.data.get("switch_value").getAsInt();
+            mBind.cbIBeacon.setChecked(enable == 1);
+            mBind.layoutAdvertise.setVisibility(enable == 1 ? View.VISIBLE : View.GONE);
+            major = result.data.get("major").getAsInt();
+            mBind.etMajor.setText(String.valueOf(major));
+            mBind.etMajor.setSelection(mBind.etMajor.getText().length());
+            minor = result.data.get("minor").getAsInt();
+            mBind.etMinor.setText(String.valueOf(minor));
+            mBind.etMinor.setSelection(mBind.etMinor.getText().length());
+            uuid = result.data.get("uuid").getAsString();
+            mBind.etUUid.setText(uuid);
+            mBind.etUUid.setSelection(mBind.etUUid.getText().length());
+            advInterval = result.data.get("adv_interval").getAsInt();
+            mBind.etAdInterval.setText(String.valueOf(advInterval));
+            mBind.etAdInterval.setSelection(mBind.etAdInterval.getText().length());
+            mSelected = result.data.get("tx_power").getAsInt();
+            mBind.tvTxPowerVal.setText(txPowerArr[mSelected]);
+        }
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_BEACON_PARAMS) {
+            Type type = new TypeToken<MsgConfigResult>() {
+            }.getType();
+            MsgConfigResult result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            dismissLoadingProgressDialog();
+            mHandler.removeMessages(0);
+            if (result.result_code == 0) {
+                ToastUtils.showToast(this, "Set up succeed");
+            } else {
+                ToastUtils.showToast(this, "Set up failed");
+            }
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 100)
@@ -94,7 +196,6 @@ public class AdvertiseIBeaconActivity extends BaseActivity<ActivityAdvertiseIbea
         if (MokoConstants.ACTION_ORDER_RESULT.equals(action)) {
             OrderTaskResponse response = event.getResponse();
             OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
-            int responseType = response.responseType;
             byte[] value = response.responseValue;
             if (orderCHAR == OrderCHAR.CHAR_PARAMS) {
                 if (value.length >= 4) {
@@ -103,9 +204,7 @@ public class AdvertiseIBeaconActivity extends BaseActivity<ActivityAdvertiseIbea
                     int cmd = value[2] & 0xFF;
                     if (header == 0xED) {
                         ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
-                        if (configKeyEnum == null) {
-                            return;
-                        }
+                        if (configKeyEnum == null) return;
                         int length = value[3] & 0xFF;
                         if (flag == 0x01) {
                             // write
@@ -208,26 +307,71 @@ public class AdvertiseIBeaconActivity extends BaseActivity<ActivityAdvertiseIbea
 
     public void onSave(View view) {
         if (isWindowLocked()) return;
-        showLoadingProgressDialog();
-        if (!mBind.cbIBeacon.isChecked()) {
-            MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setIBeaconEnable(0));
+        if (null == mMokoDevice) {
+            showLoadingProgressDialog();
+            if (!mBind.cbIBeacon.isChecked()) {
+                MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setIBeaconEnable(0));
+            } else {
+                if (isValid()) {
+                    List<OrderTask> orderTasks = new ArrayList<>(8);
+                    orderTasks.add(OrderTaskAssembler.setIBeaconEnable(1));
+                    int major = Integer.parseInt(mBind.etMajor.getText().toString());
+                    int minor = Integer.parseInt(mBind.etMinor.getText().toString());
+                    String uuid = mBind.etUUid.getText().toString();
+                    int interval = Integer.parseInt(mBind.etAdInterval.getText().toString());
+                    orderTasks.add(OrderTaskAssembler.setIBeaconMajor(major));
+                    orderTasks.add(OrderTaskAssembler.setIBeaconMinor(minor));
+                    orderTasks.add(OrderTaskAssembler.setIBeaconUuid(uuid));
+                    orderTasks.add(OrderTaskAssembler.setIBeaconAdInterval(interval));
+                    orderTasks.add(OrderTaskAssembler.setIBeaconTxPower(mSelected));
+                    MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
+                } else {
+                    ToastUtils.showToast(this, "Para Error");
+                }
+            }
         } else {
-            if (isValid()) {
-                List<OrderTask> orderTasks = new ArrayList<>(8);
-                orderTasks.add(OrderTaskAssembler.setIBeaconEnable(1));
+            //mqtt协议
+            if (!mBind.cbIBeacon.isChecked()) {
+                //不校验参数
+                int major = (TextUtils.isEmpty(mBind.etMajor.getText()) || Integer.parseInt(mBind.etMajor.getText().toString()) > 65535) ? this.major : Integer.parseInt(mBind.etMajor.getText().toString());
+                int minor = (TextUtils.isEmpty(mBind.etMinor.getText()) || Integer.parseInt(mBind.etMinor.getText().toString()) > 65535) ? this.minor : Integer.parseInt(mBind.etMinor.getText().toString());
+                String uuid = (TextUtils.isEmpty(mBind.etUUid.getText()) || mBind.etUUid.getText().length() != 32) ? this.uuid : mBind.etUUid.getText().toString();
+                int interval = (TextUtils.isEmpty(mBind.etAdInterval.getText()) || Integer.parseInt(mBind.etAdInterval.getText().toString()) < 1 ||
+                        Integer.parseInt(mBind.etAdInterval.getText().toString()) > 100) ? this.advInterval : Integer.parseInt(mBind.etAdInterval.getText().toString());
+                setBeaconParams(major, minor, uuid, interval);
+            } else {
+                if (!isValid()) {
+                    ToastUtils.showToast(this, "Para Error");
+                    return;
+                }
                 int major = Integer.parseInt(mBind.etMajor.getText().toString());
                 int minor = Integer.parseInt(mBind.etMinor.getText().toString());
                 String uuid = mBind.etUUid.getText().toString();
                 int interval = Integer.parseInt(mBind.etAdInterval.getText().toString());
-                orderTasks.add(OrderTaskAssembler.setIBeaconMajor(major));
-                orderTasks.add(OrderTaskAssembler.setIBeaconMinor(minor));
-                orderTasks.add(OrderTaskAssembler.setIBeaconUuid(uuid));
-                orderTasks.add(OrderTaskAssembler.setIBeaconAdInterval(interval));
-                orderTasks.add(OrderTaskAssembler.setIBeaconTxPower(mSelected));
-                MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
-            } else {
-                ToastUtils.showToast(this, "Para Error");
+                setBeaconParams(major, minor, uuid, interval);
             }
+        }
+    }
+
+    private void setBeaconParams(int major, int minor, String uuid, int advInterval) {
+        showLoadingProgressDialog();
+        mHandler.postDelayed(() -> {
+            dismissLoadingProgressDialog();
+            ToastUtils.showToast(this, "Setup failed!");
+        }, 30 * 1000);
+        int msgId = MQTTConstants.CONFIG_MSG_ID_BEACON_PARAMS;
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("switch_value", mBind.cbIBeacon.isChecked() ? 1 : 0);
+        jsonObject.addProperty("major", major);
+        jsonObject.addProperty("minor", minor);
+        jsonObject.addProperty("uuid", uuid);
+        jsonObject.addProperty("adv_interval", advInterval);
+        jsonObject.addProperty("tx_power", mSelected);
+        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
         }
     }
 

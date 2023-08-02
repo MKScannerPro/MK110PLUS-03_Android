@@ -1,7 +1,9 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
+
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -11,12 +13,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityDeviceInformationBinding;
+import com.moko.mkremotegw03.databinding.ActivitySyncFromNtpBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
+import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.support.remotegw.MQTTConstants;
 import com.moko.support.remotegw.MQTTSupport;
+import com.moko.support.remotegw.entity.MsgConfigResult;
 import com.moko.support.remotegw.entity.MsgReadResult;
 import com.moko.support.remotegw.event.DeviceOnlineEvent;
 import com.moko.support.remotegw.event.MQTTMessageArrivedEvent;
@@ -27,7 +31,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-public class DeviceInfoActivity extends BaseActivity<ActivityDeviceInformationBinding> {
+public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBinding> {
+    private final String FILTER_ASCII = "[ -~]*";
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -37,6 +42,14 @@ public class DeviceInfoActivity extends BaseActivity<ActivityDeviceInformationBi
 
     @Override
     protected void onCreate() {
+        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
+            if (!(source + "").matches(FILTER_ASCII)) {
+                return "";
+            }
+
+            return null;
+        };
+        mBind.etNtpServer.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -47,12 +60,12 @@ public class DeviceInfoActivity extends BaseActivity<ActivityDeviceInformationBi
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getDeviceInfo();
+        getNtpServer();
     }
 
     @Override
-    protected ActivityDeviceInformationBinding getViewBinding() {
-        return ActivityDeviceInformationBinding.inflate(getLayoutInflater());
+    protected ActivitySyncFromNtpBinding getViewBinding() {
+        return ActivitySyncFromNtpBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -71,7 +84,7 @@ public class DeviceInfoActivity extends BaseActivity<ActivityDeviceInformationBi
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_DEVICE_INFO) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_NTP_SERVER) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -79,14 +92,22 @@ public class DeviceInfoActivity extends BaseActivity<ActivityDeviceInformationBi
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.tvDeviceName.setText(result.data.get("device_name").getAsString());
-            mBind.tvProductModel.setText(result.data.get("product_model").getAsString());
-            mBind.tvManufacturer.setText(result.data.get("company_name").getAsString());
-            mBind.tvDeviceHardwareVersion.setText(result.data.get("hardware_version").getAsString());
-            mBind.tvDeviceSoftwareVersion.setText(result.data.get("software_version").getAsString());
-            mBind.tvDeviceFirmwareVersion.setText(result.data.get("firmware_version").getAsString());
-            mBind.tvDeviceStaMac.setText(result.device_info.mac);
-            mBind.tvDeviceBtMac.setText(result.data.get("ble_mac").getAsString());
+            mBind.cbSyncSwitch.setChecked(result.data.get("switch_value").getAsInt() == 1);
+            mBind.etNtpServer.setText(result.data.get("server").getAsString());
+        }
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_NTP_SERVER) {
+            Type type = new TypeToken<MsgConfigResult>() {
+            }.getType();
+            MsgConfigResult result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
+                return;
+            dismissLoadingProgressDialog();
+            mHandler.removeMessages(0);
+            if (result.result_code == 0) {
+                ToastUtils.showToast(this, "Set up succeed");
+            } else {
+                ToastUtils.showToast(this, "Set up failed");
+            }
         }
     }
 
@@ -95,14 +116,37 @@ public class DeviceInfoActivity extends BaseActivity<ActivityDeviceInformationBi
         super.offline(event, mMokoDevice.mac);
     }
 
+    private void getNtpServer() {
+        int msgId = MQTTConstants.READ_MSG_ID_NTP_SERVER;
+        String message = assembleReadCommon(msgId, mMokoDevice.mac);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void onBack(View view) {
         finish();
     }
 
+    public void onSave(View view) {
+        if (isWindowLocked()) return;
+        mHandler.postDelayed(() -> {
+            dismissLoadingProgressDialog();
+            ToastUtils.showToast(this, "Set up failed");
+        }, 30 * 1000);
+        showLoadingProgressDialog();
+        setNtpServer();
+    }
 
-    private void getDeviceInfo() {
-        int msgId = MQTTConstants.READ_MSG_ID_DEVICE_INFO;
-        String message = assembleReadCommon(msgId, mMokoDevice.mac);
+
+    private void setNtpServer() {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_NTP_SERVER;
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("switch_value", mBind.cbSyncSwitch.isChecked() ? 1 : 0);
+        jsonObject.addProperty("server", mBind.etNtpServer.getText().toString());
+        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {

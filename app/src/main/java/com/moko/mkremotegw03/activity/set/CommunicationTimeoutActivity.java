@@ -1,4 +1,4 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityNetworkReportIntervalBinding;
+import com.moko.mkremotegw03.databinding.ActivityCommunicationTimeoutBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -30,7 +30,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkReportIntervalBinding> {
+public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunicationTimeoutBinding> {
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -50,12 +50,12 @@ public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkR
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getNetworkReportInterval();
+        getCommunicationTimeout();
     }
 
     @Override
-    protected ActivityNetworkReportIntervalBinding getViewBinding() {
-        return ActivityNetworkReportIntervalBinding.inflate(getLayoutInflater());
+    protected ActivityCommunicationTimeoutBinding getViewBinding() {
+        return ActivityCommunicationTimeoutBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -74,7 +74,7 @@ public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkR
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_NETWORK_REPORT_INTERVAL) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_COMMUNICATION_TIMEOUT) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -82,9 +82,9 @@ public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkR
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.etNetworkReportInterval.setText(String.valueOf(result.data.get("report_interval").getAsInt()));
+            mBind.etCommunicationTimeout.setText(String.valueOf(result.data.get("timeout").getAsInt()));
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_NETWORK_REPORT_INTERVAL) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_COMMUNICATION_TIMEOUT) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -109,10 +109,10 @@ public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkR
         finish();
     }
 
-    private void setNetworkReportInterval(int interval) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_NETWORK_REPORT_INTERVAL;
+    private void setCommunicationTimeout(int timeout) {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_COMMUNICATION_TIMEOUT;
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("report_interval", interval);
+        jsonObject.addProperty("timeout", timeout);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -121,8 +121,9 @@ public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkR
         }
     }
 
-    private void getNetworkReportInterval() {
-        int msgId = MQTTConstants.READ_MSG_ID_NETWORK_REPORT_INTERVAL;
+
+    private void getCommunicationTimeout() {
+        int msgId = MQTTConstants.READ_MSG_ID_COMMUNICATION_TIMEOUT;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -133,13 +134,13 @@ public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkR
 
     public void onSave(View view) {
         if (isWindowLocked()) return;
-        String intervalStr = mBind.etNetworkReportInterval.getText().toString();
-        if (TextUtils.isEmpty(intervalStr)) {
+        String timeoutStr = mBind.etCommunicationTimeout.getText().toString();
+        if (TextUtils.isEmpty(timeoutStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        int interval = Integer.parseInt(intervalStr);
-        if (interval != 0 && (interval < 30 || interval > 86400)) {
+        int timeout = Integer.parseInt(timeoutStr);
+        if (timeout > 60) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
@@ -152,6 +153,6 @@ public class NetworkReportIntervalActivity extends BaseActivity<ActivityNetworkR
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
-        setNetworkReportInterval(interval);
+        setCommunicationTimeout(timeout);
     }
 }

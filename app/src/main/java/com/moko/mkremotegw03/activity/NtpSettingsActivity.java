@@ -25,10 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class NtpSettingsActivity extends BaseActivity<ActivityNtpSettingsBinding> {
-
     private final String FILTER_ASCII = "[ -~]*";
-    private InputFilter filter;
-
     private ArrayList<String> mTimeZones;
     private int mSelected;
     private boolean mSavedParamsError;
@@ -55,7 +52,7 @@ public class NtpSettingsActivity extends BaseActivity<ActivityNtpSettingsBinding
                 }
             }
         }
-        filter = (source, start, end, dest, dstart, dend) -> {
+        InputFilter filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
             }

@@ -1,9 +1,7 @@
-package com.moko.mkremotegw03.activity;
-
+package com.moko.mkremotegw03.activity.set;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -12,8 +10,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
+import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityFilterUrlBinding;
+import com.moko.mkremotegw03.databinding.ActivityIndicatorSettingBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -31,25 +30,19 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-public class FilterUrlActivity extends BaseActivity<ActivityFilterUrlBinding> {
-    private final String FILTER_ASCII = "[ -~]*";
-
+public class IndicatorSettingActivity extends BaseActivity<ActivityIndicatorSettingBinding> {
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
+    private int bleBroadcastEnable;
+    private int bleConnectedEnable;
+    private int serverConnectingEnable;
+    private int serverConnectedEnable;
 
     public Handler mHandler;
 
     @Override
     protected void onCreate() {
-        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
-            if (!(source + "").matches(FILTER_ASCII)) {
-                return "";
-            }
-
-            return null;
-        };
-        mBind.etUrl.setFilters(new InputFilter[]{new InputFilter.LengthFilter(37), inputFilter});
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -57,15 +50,15 @@ public class FilterUrlActivity extends BaseActivity<ActivityFilterUrlBinding> {
         mHandler = new Handler(Looper.getMainLooper());
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
-            finish();
+            IndicatorSettingActivity.this.finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getFilterUrl();
+        getIndicatorStatus();
     }
 
     @Override
-    protected ActivityFilterUrlBinding getViewBinding() {
-        return ActivityFilterUrlBinding.inflate(getLayoutInflater());
+    protected ActivityIndicatorSettingBinding getViewBinding() {
+        return ActivityIndicatorSettingBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -84,7 +77,7 @@ public class FilterUrlActivity extends BaseActivity<ActivityFilterUrlBinding> {
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_FILTER_URL) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_INDICATOR_STATUS) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -92,10 +85,16 @@ public class FilterUrlActivity extends BaseActivity<ActivityFilterUrlBinding> {
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.cbUrl.setChecked(result.data.get("switch_value").getAsInt() == 1);
-            mBind.etUrl.setText(result.data.get("url").getAsString());
+            bleBroadcastEnable = result.data.get("ble_adv_led").getAsInt();
+            bleConnectedEnable = result.data.get("ble_connected_led").getAsInt();
+            serverConnectingEnable = result.data.get("server_connecting_led").getAsInt();
+            serverConnectedEnable = result.data.get("server_connected_led").getAsInt();
+            mBind.cbBleConnected.setChecked(bleConnectedEnable == 1);
+            mBind.cbBleBroadcast.setChecked(bleBroadcastEnable == 1);
+            mBind.cbServerConnecting.setChecked(serverConnectingEnable == 1);
+            mBind.cbServerConnected.setChecked(serverConnectedEnable == 1);
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_FILTER_URL) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_INDICATOR_STATUS) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -116,8 +115,32 @@ public class FilterUrlActivity extends BaseActivity<ActivityFilterUrlBinding> {
         super.offline(event, mMokoDevice.mac);
     }
 
-    private void getFilterUrl() {
-        int msgId = MQTTConstants.READ_MSG_ID_FILTER_URL;
+    public void onBack(View view) {
+        finish();
+    }
+
+
+    private void setIndicatorStatus() {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_INDICATOR_STATUS;
+        bleBroadcastEnable = mBind.cbBleBroadcast.isChecked() ? 1 : 0;
+        bleConnectedEnable = mBind.cbBleConnected.isChecked() ? 1 : 0;
+        serverConnectingEnable = mBind.cbServerConnecting.isChecked() ? 1 : 0;
+        serverConnectedEnable = mBind.cbServerConnected.isChecked() ? 1 : 0;
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("ble_adv_led", bleBroadcastEnable);
+        jsonObject.addProperty("ble_connected_led", bleConnectedEnable);
+        jsonObject.addProperty("server_connecting_led", serverConnectingEnable);
+        jsonObject.addProperty("server_connected_led", serverConnectedEnable);
+        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getIndicatorStatus() {
+        int msgId = MQTTConstants.READ_MSG_ID_INDICATOR_STATUS;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -126,31 +149,17 @@ public class FilterUrlActivity extends BaseActivity<ActivityFilterUrlBinding> {
         }
     }
 
-    public void onBack(View view) {
-        finish();
-    }
-
     public void onSave(View view) {
         if (isWindowLocked()) return;
+        if (!MQTTSupport.getInstance().isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
-        saveParams();
-    }
-
-
-    private void saveParams() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_FILTER_URL;
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("switch_value", mBind.cbUrl.isChecked() ? 1 : 0);
-        jsonObject.addProperty("url", mBind.etUrl.getText().toString());
-        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
-        try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        setIndicatorStatus();
     }
 }

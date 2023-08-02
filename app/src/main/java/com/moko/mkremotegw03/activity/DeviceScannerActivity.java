@@ -46,9 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import no.nordicsemi.android.support.v18.scanner.ScanRecord;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
-
 public class DeviceScannerActivity extends BaseActivity<ActivityScannerBinding> implements MokoScanDeviceCallback, BaseQuickAdapter.OnItemClickListener {
-
     private Animation animation = null;
     private DeviceInfoAdapter mAdapter;
     private ConcurrentHashMap<String, DeviceInfo> mDeviceMap;

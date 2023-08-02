@@ -1,4 +1,4 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityCommunicationTimeoutBinding;
+import com.moko.mkremotegw03.databinding.ActivityReconnectTimeoutBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -30,8 +30,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunicationTimeoutBinding> {
-
+public class ReconnectTimeoutActivity extends BaseActivity<ActivityReconnectTimeoutBinding> {
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
@@ -50,12 +49,12 @@ public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunica
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getCommunicationTimeout();
+        getReconnectTimeout();
     }
 
     @Override
-    protected ActivityCommunicationTimeoutBinding getViewBinding() {
-        return ActivityCommunicationTimeoutBinding.inflate(getLayoutInflater());
+    protected ActivityReconnectTimeoutBinding getViewBinding() {
+        return ActivityReconnectTimeoutBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -74,7 +73,7 @@ public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunica
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_COMMUNICATION_TIMEOUT) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_RECONNECT_TIMEOUT) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -82,9 +81,9 @@ public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunica
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.etCommunicationTimeout.setText(String.valueOf(result.data.get("timeout").getAsInt()));
+            mBind.etReconnectTimeout.setText(String.valueOf(result.data.get("timeout").getAsInt()));
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_COMMUNICATION_TIMEOUT) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_RECONNECT_TIMEOUT) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -109,10 +108,10 @@ public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunica
         finish();
     }
 
-    private void setCommunicationTimeout(int timeout) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_COMMUNICATION_TIMEOUT;
+    private void setReconnectTimeout(int interval) {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_RECONNECT_TIMEOUT;
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("timeout", timeout);
+        jsonObject.addProperty("timeout", interval);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -121,9 +120,8 @@ public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunica
         }
     }
 
-
-    private void getCommunicationTimeout() {
-        int msgId = MQTTConstants.READ_MSG_ID_COMMUNICATION_TIMEOUT;
+    private void getReconnectTimeout() {
+        int msgId = MQTTConstants.READ_MSG_ID_RECONNECT_TIMEOUT;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -134,13 +132,13 @@ public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunica
 
     public void onSave(View view) {
         if (isWindowLocked()) return;
-        String timeoutStr = mBind.etCommunicationTimeout.getText().toString();
+        String timeoutStr = mBind.etReconnectTimeout.getText().toString();
         if (TextUtils.isEmpty(timeoutStr)) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
         int timeout = Integer.parseInt(timeoutStr);
-        if (timeout > 60) {
+        if (timeout > 1440) {
             ToastUtils.showToast(this, "Para Error");
             return;
         }
@@ -153,6 +151,6 @@ public class CommunicationTimeoutActivity extends BaseActivity<ActivityCommunica
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
-        setCommunicationTimeout(timeout);
+        setReconnectTimeout(timeout);
     }
 }

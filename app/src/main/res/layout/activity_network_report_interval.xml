@@ -65,6 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_margin="12dp"
+        android:lineSpacingMultiplier="1.2"
         android:text="This value defines the time interval at which the device reports its network status. A value of 0 means that the device will report the network status only once when it connects successfully."
         android:textColor="@color/black_333333"
         android:textSize="13sp" />

@@ -1,9 +1,8 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.filter;
 
 
 import android.os.Handler;
 import android.os.Looper;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -13,7 +12,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivitySyncFromNtpBinding;
+import com.moko.mkremotegw03.databinding.ActivityFilterTlmBinding;
+import com.moko.mkremotegw03.dialog.BottomDialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -30,9 +30,9 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
-public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBinding> {
-    private final String FILTER_ASCII = "[ -~]*";
+public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -40,16 +40,15 @@ public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBin
 
     public Handler mHandler;
 
+    private ArrayList<String> mValues;
+    private int mSelected;
+
     @Override
     protected void onCreate() {
-        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
-            if (!(source + "").matches(FILTER_ASCII)) {
-                return "";
-            }
-
-            return null;
-        };
-        mBind.etNtpServer.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), inputFilter});
+        mValues = new ArrayList<>();
+        mValues.add("version 0");
+        mValues.add("version 1");
+        mValues.add("all");
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -60,12 +59,12 @@ public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBin
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getNtpServer();
+        getFilterTlm();
     }
 
     @Override
-    protected ActivitySyncFromNtpBinding getViewBinding() {
-        return ActivitySyncFromNtpBinding.inflate(getLayoutInflater());
+    protected ActivityFilterTlmBinding getViewBinding() {
+        return ActivityFilterTlmBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -84,7 +83,7 @@ public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBin
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_NTP_SERVER) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_FILTER_TLM) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -92,10 +91,11 @@ public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBin
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.cbSyncSwitch.setChecked(result.data.get("switch_value").getAsInt() == 1);
-            mBind.etNtpServer.setText(result.data.get("server").getAsString());
+            mBind.cbTlm.setChecked(result.data.get("switch_value").getAsInt() == 1);
+            mSelected = result.data.get("tlm_version").getAsInt();
+            mBind.tvTlmVersion.setText(mValues.get(mSelected));
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_NTP_SERVER) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_FILTER_TLM) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -116,8 +116,8 @@ public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBin
         super.offline(event, mMokoDevice.mac);
     }
 
-    private void getNtpServer() {
-        int msgId = MQTTConstants.READ_MSG_ID_NTP_SERVER;
+    private void getFilterTlm() {
+        int msgId = MQTTConstants.READ_MSG_ID_FILTER_TLM;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -137,20 +137,32 @@ public class SyncTimeFromNTPActivity extends BaseActivity<ActivitySyncFromNtpBin
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
-        setNtpServer();
+        saveParams();
     }
 
 
-    private void setNtpServer() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_NTP_SERVER;
+    private void saveParams() {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_FILTER_TLM;
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("switch_value", mBind.cbSyncSwitch.isChecked() ? 1 : 0);
-        jsonObject.addProperty("server", mBind.etNtpServer.getText().toString());
+        jsonObject.addProperty("switch_value", mBind.cbTlm.isChecked() ? 1 : 0);
+        jsonObject.addProperty("tlm_version", mSelected);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onTLMVersion(View view) {
+        if (isWindowLocked())
+            return;
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(mValues, mSelected);
+        dialog.setListener(value -> {
+            mSelected = value;
+            mBind.tvTlmVersion.setText(mValues.get(value));
+        });
+        dialog.show(getSupportFragmentManager());
     }
 }

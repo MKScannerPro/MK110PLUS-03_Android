@@ -1,4 +1,4 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
 
 import android.content.Intent;
 import android.os.Handler;
@@ -38,14 +38,11 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class SystemTimeActivity extends BaseActivity<ActivitySystemTimeProBinding> {
-
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-
     public Handler mHandler;
     public Handler mSyncTimeHandler;
-
     private ArrayList<String> mTimeZones;
     private int mSelectedTimeZone;
 

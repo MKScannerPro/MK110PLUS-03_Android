@@ -35,10 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBinding> {
-
     private final String FILTER_ASCII = "[ -~]*";
-    private InputFilter filter;
-
     private ArrayList<String> mSecurityValues;
     private int mSecuritySelected;
     private ArrayList<String> mEAPTypeValues;
@@ -70,7 +67,7 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
         mEAPTypeValues.add("PEAP-MSCHAPV2");
         mEAPTypeValues.add("TTLS-MSCHAPV2");
         mEAPTypeValues.add("TLS");
-        filter = (source, start, end, dest, dstart, dend) -> {
+        InputFilter filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
             }
@@ -95,14 +92,13 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
             orderTasks.add(OrderTaskAssembler.getWifiEapVerifyServiceEnable());
             MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         }, 500);
+        mBind.tvCountryBrand.setOnClickListener(v -> onSelectCountry());
     }
-
 
     @Override
     protected ActivityWifiSettingsBinding getViewBinding() {
         return ActivityWifiSettingsBinding.inflate(getLayoutInflater());
     }
-
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 100)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
@@ -167,6 +163,7 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
                                 case KEY_WIFI_EAP_DOMAIN_ID:
                                 case KEY_WIFI_EAP_VERIFY_SERVICE_ENABLE:
                                 case KEY_WIFI_PASSWORD:
+                                case KEY_UTC_TIME:
                                 case KEY_COUNTRY_BRAND:
                                     if (result != 1) {
                                         mSavedParamsError = true;
@@ -301,7 +298,7 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
         dialog.show(getSupportFragmentManager());
     }
 
-    public void onSelectCountry(View view) {
+    private void onSelectCountry() {
         if (isWindowLocked()) return;
         BottomDialog dialog = new BottomDialog();
         dialog.setDatas((ArrayList<String>) (Arrays.asList(countryBrand)), countrySelected);
@@ -427,8 +424,9 @@ public class WifiSettingsActivity extends BaseActivity<ActivityWifiSettingsBindi
                         orderTasks.add(OrderTaskAssembler.setWifiClientCert(new File(mCertPath)));
                     if (!TextUtils.isEmpty(mKeyPath))
                         orderTasks.add(OrderTaskAssembler.setWifiClientKey(new File(mKeyPath)));
-
                 }
+                //同步时间
+                orderTasks.add(OrderTaskAssembler.setUtcTime());
             }
             orderTasks.add(OrderTaskAssembler.setCountryBrand(countrySelected));
             orderTasks.add(OrderTaskAssembler.setWifiEapType(mEAPTypeSelected));

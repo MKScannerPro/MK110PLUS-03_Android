@@ -1,4 +1,4 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityIndicatorSettingBinding;
+import com.moko.mkremotegw03.databinding.ActivityButtonResetBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -30,17 +30,10 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-public class IndicatorSettingActivity extends BaseActivity<ActivityIndicatorSettingBinding> {
-
+public class ButtonResetActivity extends BaseActivity<ActivityButtonResetBinding> {
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-
-    private int bleBroadcastEnable;
-    private int bleConnectedEnable;
-    private int serverConnectingEnable;
-    private int serverConnectedEnable;
-
     public Handler mHandler;
 
     @Override
@@ -52,17 +45,16 @@ public class IndicatorSettingActivity extends BaseActivity<ActivityIndicatorSett
         mHandler = new Handler(Looper.getMainLooper());
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
-            IndicatorSettingActivity.this.finish();
+            finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getIndicatorStatus();
+        getButtonReset();
     }
 
     @Override
-    protected ActivityIndicatorSettingBinding getViewBinding() {
-        return ActivityIndicatorSettingBinding.inflate(getLayoutInflater());
+    protected ActivityButtonResetBinding getViewBinding() {
+        return ActivityButtonResetBinding.inflate(getLayoutInflater());
     }
-
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMQTTMessageArrivedEvent(MQTTMessageArrivedEvent event) {
@@ -80,7 +72,7 @@ public class IndicatorSettingActivity extends BaseActivity<ActivityIndicatorSett
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_INDICATOR_STATUS) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_BUTTON_RESET) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -88,16 +80,29 @@ public class IndicatorSettingActivity extends BaseActivity<ActivityIndicatorSett
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            bleBroadcastEnable = result.data.get("ble_adv_led").getAsInt();
-            bleConnectedEnable = result.data.get("ble_connected_led").getAsInt();
-            serverConnectingEnable = result.data.get("server_connecting_led").getAsInt();
-            serverConnectedEnable = result.data.get("server_connected_led").getAsInt();
-            mBind.cbBleConnected.setChecked(bleConnectedEnable == 1);
-            mBind.cbBleBroadcast.setChecked(bleBroadcastEnable == 1);
-            mBind.cbServerConnecting.setChecked(serverConnectingEnable == 1);
-            mBind.cbServerConnected.setChecked(serverConnectedEnable == 1);
+            int resetType = result.data.get("key_reset_type").getAsInt();
+            if (resetType == 1) {
+                mBind.rbFixedTime.setChecked(true);
+            } else if (resetType == 2) {
+                mBind.rbAnyTime.setChecked(true);
+            }
+            mBind.rgButtonReset.setOnCheckedChangeListener((group, checkedId) -> {
+                int value = 1;
+                if (checkedId == R.id.rb_fixed_time) {
+                    value = 1;
+                } else if (checkedId == R.id.rb_any_time) {
+                    value = 2;
+                }
+                mHandler.postDelayed(() -> {
+                    dismissLoadingProgressDialog();
+                    ToastUtils.showToast(this, "Set up failed");
+                }, 30 * 1000);
+                showLoadingProgressDialog();
+                setButtonReset(value);
+            });
+
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_INDICATOR_STATUS) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_BUTTON_RESET) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -122,28 +127,8 @@ public class IndicatorSettingActivity extends BaseActivity<ActivityIndicatorSett
         finish();
     }
 
-
-    private void setIndicatorStatus() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_INDICATOR_STATUS;
-        bleBroadcastEnable = mBind.cbBleBroadcast.isChecked() ? 1 : 0;
-        bleConnectedEnable = mBind.cbBleConnected.isChecked() ? 1 : 0;
-        serverConnectingEnable = mBind.cbServerConnecting.isChecked() ? 1 : 0;
-        serverConnectedEnable = mBind.cbServerConnected.isChecked() ? 1 : 0;
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("ble_adv_led", bleBroadcastEnable);
-        jsonObject.addProperty("ble_connected_led", bleConnectedEnable);
-        jsonObject.addProperty("server_connecting_led", serverConnectingEnable);
-        jsonObject.addProperty("server_connected_led", serverConnectedEnable);
-        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
-        try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void getIndicatorStatus() {
-        int msgId = MQTTConstants.READ_MSG_ID_INDICATOR_STATUS;
+    private void getButtonReset() {
+        int msgId = MQTTConstants.READ_MSG_ID_BUTTON_RESET;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -152,17 +137,16 @@ public class IndicatorSettingActivity extends BaseActivity<ActivityIndicatorSett
         }
     }
 
-    public void onSave(View view) {
-        if (isWindowLocked()) return;
-        if (!MQTTSupport.getInstance().isConnected()) {
-            ToastUtils.showToast(this, R.string.network_error);
-            return;
+    private void setButtonReset(int value) {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_BUTTON_RESET;
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("key_reset_type", value);
+        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
         }
-        mHandler.postDelayed(() -> {
-            dismissLoadingProgressDialog();
-            ToastUtils.showToast(this, "Set up failed");
-        }, 30 * 1000);
-        showLoadingProgressDialog();
-        setIndicatorStatus();
     }
+
 }

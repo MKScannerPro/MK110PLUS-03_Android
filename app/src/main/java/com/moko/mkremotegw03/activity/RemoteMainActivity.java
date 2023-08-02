@@ -19,6 +19,8 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.BuildConfig;
 import com.moko.mkremotegw03.R;
+import com.moko.mkremotegw03.activity.set.DeviceSettingActivity;
+import com.moko.mkremotegw03.activity.set.ModifySettingsActivity;
 import com.moko.mkremotegw03.adapter.DeviceAdapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMainRemoteBinding;

@@ -8,12 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
-import com.moko.mkremotegw03.activity.ModifyMQTTSettingsActivity;
+import com.moko.mkremotegw03.activity.set.ModifyMQTTSettingsActivity;
 import com.moko.mkremotegw03.databinding.FragmentSslDeviceUrlBinding;
 import com.moko.mkremotegw03.dialog.BottomDialog;
 
 import java.util.ArrayList;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 public class SSLDeviceUrlFragment extends Fragment {
@@ -48,27 +49,23 @@ public class SSLDeviceUrlFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
         mBind = FragmentSslDeviceUrlBinding.inflate(inflater, container, false);
         activity = (ModifyMQTTSettingsActivity) getActivity();
         mBind.clCertificate.setVisibility(mConnectMode > 0 ? View.VISIBLE : View.GONE);
         mBind.cbSsl.setChecked(mConnectMode > 0);
-        mBind.cbSsl.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!isChecked) {
-                    mConnectMode = 0;
-                } else {
-                    mConnectMode = selected + 1;
-                }
-                mBind.clCertificate.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        mBind.cbSsl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked) {
+                mConnectMode = 0;
+            } else {
+                mConnectMode = selected + 1;
             }
+            mBind.clCertificate.setVisibility(isChecked ? View.VISIBLE : View.GONE);
         });
         values = new ArrayList<>();
         values.add("CA signed server certificate");
-        values.add("CA certificate file");
+        values.add("CA certificate");
         values.add("Self signed certificates");
         mBind.etCaUrl.setFilters(new InputFilter[]{new InputFilter.LengthFilter(256), activity.filter});
         mBind.etClientKeyUrl.setFilters(new InputFilter[]{new InputFilter.LengthFilter(256), activity.filter});

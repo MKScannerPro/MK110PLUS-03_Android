@@ -123,7 +123,8 @@
                 android:paddingRight="12dp"
                 android:text="@string/data_report_timeout"
                 android:textColor="@color/black_333333"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -145,6 +146,20 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="1dp"
                 android:background="@color/white_ffffff"
+                android:drawableRight="@drawable/arrow_right"
+                android:gravity="center_vertical"
+                android:onClick="onAdvertiseIBeacon"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:text="Advertise iBeacon"
+                android:textColor="@color/black_333333"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="1dp"
+                android:background="@color/white_ffffff"
                 android:clickable="true"
                 android:drawableRight="@drawable/arrow_right"
                 android:gravity="center_vertical"
@@ -155,21 +170,59 @@
                 android:textColor="@color/black_333333"
                 android:textSize="15sp" />
 
-            <TextView
-                android:id="@+id/tv_adv_state"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@color/white_ffffff"
+                android:gravity="center_vertical"
+                android:onClick="onOutputSwitch"
+                android:orientation="horizontal"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp">
+
+                <TextView
+                    android:layout_width="0px"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="Output switch"
+                    android:textColor="@color/black_333333"
+                    android:textSize="15sp" />
+
+                <ImageView
+                    android:id="@+id/imgOutputSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/checkbox_close" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
                 android:background="@color/white_ffffff"
-                android:clickable="true"
-                android:drawableRight="@drawable/ic_cb_close"
                 android:gravity="center_vertical"
-                android:onClick="onAdvSettings"
+                android:onClick="onOutputControl"
+                android:orientation="horizontal"
                 android:paddingLeft="12dp"
-                android:paddingRight="12dp"
-                android:text="Advertise settings"
-                android:textColor="@color/black_333333"
-                android:textSize="15sp" />
+                android:paddingRight="12dp">
+
+                <TextView
+                    android:layout_width="0px"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="Output control by button"
+                    android:textColor="@color/black_333333"
+                    android:textSize="15sp" />
+
+                <ImageView
+                    android:id="@+id/imgOutputControl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/checkbox_close" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"

@@ -1,5 +1,4 @@
-package com.moko.mkremotegw03.activity;
-
+package com.moko.mkremotegw03.activity.filter;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -12,8 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityFilterTlmBinding;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.databinding.ActivityUploadDataOptionRemoteBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -30,9 +28,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 
-public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
+public class UploadDataOptionActivity extends BaseActivity<ActivityUploadDataOptionRemoteBinding> {
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -40,15 +37,8 @@ public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
 
     public Handler mHandler;
 
-    private ArrayList<String> mValues;
-    private int mSelected;
-
     @Override
     protected void onCreate() {
-        mValues = new ArrayList<>();
-        mValues.add("version 0");
-        mValues.add("version 1");
-        mValues.add("all");
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -59,12 +49,12 @@ public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getFilterTlm();
+        getUploadDataOption();
     }
 
     @Override
-    protected ActivityFilterTlmBinding getViewBinding() {
-        return ActivityFilterTlmBinding.inflate(getLayoutInflater());
+    protected ActivityUploadDataOptionRemoteBinding getViewBinding() {
+        return ActivityUploadDataOptionRemoteBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -83,7 +73,7 @@ public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_FILTER_TLM) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_UPLOAD_DATA_OPTION) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -91,11 +81,11 @@ public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.cbTlm.setChecked(result.data.get("switch_value").getAsInt() == 1);
-            mSelected = result.data.get("tlm_version").getAsInt();
-            mBind.tvTlmVersion.setText(mValues.get(mSelected));
+            mBind.cbTimestamp.setChecked(result.data.get("timestamp").getAsInt() == 1);
+            mBind.cbRawDataAdv.setChecked(result.data.get("adv_data").getAsInt() == 1);
+            mBind.cbRawDataRsp.setChecked(result.data.get("rsp_data").getAsInt() == 1);
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_FILTER_TLM) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_UPLOAD_DATA_OPTION) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -116,36 +106,16 @@ public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
         super.offline(event, mMokoDevice.mac);
     }
 
-    private void getFilterTlm() {
-        int msgId = MQTTConstants.READ_MSG_ID_FILTER_TLM;
-        String message = assembleReadCommon(msgId, mMokoDevice.mac);
-        try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void onBack(View view) {
         finish();
     }
 
-    public void onSave(View view) {
-        if (isWindowLocked()) return;
-        mHandler.postDelayed(() -> {
-            dismissLoadingProgressDialog();
-            ToastUtils.showToast(this, "Set up failed");
-        }, 30 * 1000);
-        showLoadingProgressDialog();
-        saveParams();
-    }
-
-
-    private void saveParams() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_FILTER_TLM;
+    private void setUploadDataOption() {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_UPLOAD_DATA_OPTION;
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("switch_value", mBind.cbTlm.isChecked() ? 1 : 0);
-        jsonObject.addProperty("tlm_version", mSelected);
+        jsonObject.addProperty("timestamp", mBind.cbTimestamp.isChecked() ? 1 : 0);
+        jsonObject.addProperty("adv_data", mBind.cbRawDataAdv.isChecked() ? 1 : 0);
+        jsonObject.addProperty("rsp_data", mBind.cbRawDataRsp.isChecked() ? 1 : 0);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -154,15 +124,24 @@ public class FilterTLMActivity extends BaseActivity<ActivityFilterTlmBinding> {
         }
     }
 
-    public void onTLMVersion(View view) {
+    private void getUploadDataOption() {
+        int msgId = MQTTConstants.READ_MSG_ID_UPLOAD_DATA_OPTION;
+        String message = assembleReadCommon(msgId, mMokoDevice.mac);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onSave(View view) {
         if (isWindowLocked())
             return;
-        BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mSelected);
-        dialog.setListener(value -> {
-            mSelected = value;
-            mBind.tvTlmVersion.setText(mValues.get(value));
-        });
-        dialog.show(getSupportFragmentManager());
+        mHandler.postDelayed(() -> {
+            dismissLoadingProgressDialog();
+            ToastUtils.showToast(this, "Set up failed");
+        }, 30 * 1000);
+        showLoadingProgressDialog();
+        setUploadDataOption();
     }
 }

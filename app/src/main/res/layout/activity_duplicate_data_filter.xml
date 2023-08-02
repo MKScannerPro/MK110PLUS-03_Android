@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/grey_f2f2f2"
     android:orientation="vertical">
 
@@ -81,6 +82,7 @@
         android:focusableInTouchMode="true"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
+        tools:visibility="visible"
         android:visibility="gone">
 
         <TextView

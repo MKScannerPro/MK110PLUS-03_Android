@@ -25,6 +25,9 @@ public enum ParamsKeyEnum implements Serializable {
     KEY_NTP_ENABLE(0x10),
     KEY_NTP_URL(0x11),
     KEY_NTP_TIME_ZONE(0x12),
+    KEY_FIRMWARE_VERSION(0x13),
+    KEY_UTC_TIME(0x14),
+    KEY_BUTTON_SWITCH_ENABLE(0x15),
     // MQTT
     KEY_MQTT_HOST(0x20),
     KEY_MQTT_PORT(0x21),
@@ -76,7 +79,7 @@ public enum ParamsKeyEnum implements Serializable {
     KEY_LOAD_DETECTION_NOTIFY_ENABLE(0x83),
     ;
 
-    private int paramsKey;
+    private final int paramsKey;
 
     ParamsKeyEnum(int paramsKey) {
         this.paramsKey = paramsKey;

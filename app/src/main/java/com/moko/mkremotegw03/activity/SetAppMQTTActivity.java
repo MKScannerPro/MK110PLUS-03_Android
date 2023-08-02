@@ -54,15 +54,11 @@ import androidx.viewpager2.widget.ViewPager2;
 
 public class SetAppMQTTActivity extends BaseActivity<ActivityMqttAppRemoteBinding> implements RadioGroup.OnCheckedChangeListener {
     private final String FILTER_ASCII = "[ -~]*";
-
     private GeneralFragment generalFragment;
     private UserFragment userFragment;
     private SSLFragment sslFragment;
-    private MQTTFragmentAdapter adapter;
     private ArrayList<Fragment> fragments;
-
     private MQTTConfig mqttConfig;
-
     private String expertFilePath;
     private boolean isFileError;
 
@@ -92,7 +88,7 @@ public class SetAppMQTTActivity extends BaseActivity<ActivityMqttAppRemoteBindin
         mBind.etMqttPublishTopic.setFilters(new InputFilter[]{new InputFilter.LengthFilter(128), filter});
         createFragment();
         initData();
-        adapter = new MQTTFragmentAdapter(this);
+        MQTTFragmentAdapter adapter = new MQTTFragmentAdapter(this);
         adapter.setFragmentList(fragments);
         mBind.vpMqtt.setAdapter(adapter);
         mBind.vpMqtt.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -116,7 +112,6 @@ public class SetAppMQTTActivity extends BaseActivity<ActivityMqttAppRemoteBindin
     protected ActivityMqttAppRemoteBinding getViewBinding() {
         return ActivityMqttAppRemoteBinding.inflate(getLayoutInflater());
     }
-
 
     private void createFragment() {
         fragments = new ArrayList<>();
@@ -180,12 +175,8 @@ public class SetAppMQTTActivity extends BaseActivity<ActivityMqttAppRemoteBindin
         dialog.setMessage("Please confirm whether to save the modified parameters?");
         dialog.setConfirm("YES");
         dialog.setCancel("NO");
-        dialog.setOnAlertConfirmListener(() -> {
-            onSave(null);
-        });
-        dialog.setOnAlertCancelListener(() -> {
-            finish();
-        });
+        dialog.setOnAlertConfirmListener(() -> onSave(null));
+        dialog.setOnAlertCancelListener(this::finish);
         dialog.show(getSupportFragmentManager());
     }
 
@@ -247,8 +238,7 @@ public class SetAppMQTTActivity extends BaseActivity<ActivityMqttAppRemoteBindin
             ToastUtils.showToast(this, getString(R.string.mqtt_verify_client_id_empty));
             return true;
         }
-        if (!generalFragment.isValid() || !sslFragment.isValid())
-            return true;
+        if (!generalFragment.isValid() || !sslFragment.isValid()) return true;
         mqttConfig.host = host;
         mqttConfig.port = port;
         mqttConfig.clientId = clientId;

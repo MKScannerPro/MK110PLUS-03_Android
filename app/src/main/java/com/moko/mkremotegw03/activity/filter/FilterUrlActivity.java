@@ -1,7 +1,8 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.filter;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -11,7 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityUploadDataOptionRemoteBinding;
+import com.moko.mkremotegw03.databinding.ActivityFilterUrlBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -29,16 +30,22 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-public class UploadDataOptionActivity extends BaseActivity<ActivityUploadDataOptionRemoteBinding> {
-
+public class FilterUrlActivity extends BaseActivity<ActivityFilterUrlBinding> {
+    private final String FILTER_ASCII = "[ -~]*";
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-
     public Handler mHandler;
 
     @Override
     protected void onCreate() {
+        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
+            if (!(source + "").matches(FILTER_ASCII)) {
+                return "";
+            }
+            return null;
+        };
+        mBind.etUrl.setFilters(new InputFilter[]{new InputFilter.LengthFilter(37), inputFilter});
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -49,12 +56,12 @@ public class UploadDataOptionActivity extends BaseActivity<ActivityUploadDataOpt
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getUploadDataOption();
+        getFilterUrl();
     }
 
     @Override
-    protected ActivityUploadDataOptionRemoteBinding getViewBinding() {
-        return ActivityUploadDataOptionRemoteBinding.inflate(getLayoutInflater());
+    protected ActivityFilterUrlBinding getViewBinding() {
+        return ActivityFilterUrlBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -62,8 +69,7 @@ public class UploadDataOptionActivity extends BaseActivity<ActivityUploadDataOpt
         // 更新所有设备的网络状态
         final String topic = event.getTopic();
         final String message = event.getMessage();
-        if (TextUtils.isEmpty(message))
-            return;
+        if (TextUtils.isEmpty(message)) return;
         int msg_id;
         try {
             JsonObject object = new Gson().fromJson(message, JsonObject.class);
@@ -73,24 +79,21 @@ public class UploadDataOptionActivity extends BaseActivity<ActivityUploadDataOpt
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_UPLOAD_DATA_OPTION) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_FILTER_URL) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.cbTimestamp.setChecked(result.data.get("timestamp").getAsInt() == 1);
-            mBind.cbRawDataAdv.setChecked(result.data.get("adv_data").getAsInt() == 1);
-            mBind.cbRawDataRsp.setChecked(result.data.get("rsp_data").getAsInt() == 1);
+            mBind.cbUrl.setChecked(result.data.get("switch_value").getAsInt() == 1);
+            mBind.etUrl.setText(result.data.get("url").getAsString());
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_UPLOAD_DATA_OPTION) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_FILTER_URL) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             if (result.result_code == 0) {
@@ -106,26 +109,8 @@ public class UploadDataOptionActivity extends BaseActivity<ActivityUploadDataOpt
         super.offline(event, mMokoDevice.mac);
     }
 
-    public void onBack(View view) {
-        finish();
-    }
-
-    private void setUploadDataOption() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_UPLOAD_DATA_OPTION;
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("timestamp", mBind.cbTimestamp.isChecked() ? 1 : 0);
-        jsonObject.addProperty("adv_data", mBind.cbRawDataAdv.isChecked() ? 1 : 0);
-        jsonObject.addProperty("rsp_data", mBind.cbRawDataRsp.isChecked() ? 1 : 0);
-        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
-        try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void getUploadDataOption() {
-        int msgId = MQTTConstants.READ_MSG_ID_UPLOAD_DATA_OPTION;
+    private void getFilterUrl() {
+        int msgId = MQTTConstants.READ_MSG_ID_FILTER_URL;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -134,14 +119,31 @@ public class UploadDataOptionActivity extends BaseActivity<ActivityUploadDataOpt
         }
     }
 
+    public void onBack(View view) {
+        finish();
+    }
+
     public void onSave(View view) {
-        if (isWindowLocked())
-            return;
+        if (isWindowLocked()) return;
         mHandler.postDelayed(() -> {
             dismissLoadingProgressDialog();
             ToastUtils.showToast(this, "Set up failed");
         }, 30 * 1000);
         showLoadingProgressDialog();
-        setUploadDataOption();
+        saveParams();
+    }
+
+
+    private void saveParams() {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_FILTER_URL;
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("switch_value", mBind.cbUrl.isChecked() ? 1 : 0);
+        jsonObject.addProperty("url", mBind.etUrl.getText().toString());
+        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
     }
 }

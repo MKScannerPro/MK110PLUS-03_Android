@@ -1,25 +1,43 @@
 package com.moko.mkremotegw03.activity;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.CompoundButton;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
+import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMeteringSettingsBinding;
+import com.moko.mkremotegw03.entity.MQTTConfig;
+import com.moko.mkremotegw03.entity.MokoDevice;
+import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
+import com.moko.support.remotegw.MQTTConstants;
+import com.moko.support.remotegw.MQTTSupport;
 import com.moko.support.remotegw.MokoSupport;
 import com.moko.support.remotegw.OrderTaskAssembler;
+import com.moko.support.remotegw.entity.MsgConfigResult;
+import com.moko.support.remotegw.entity.MsgReadResult;
 import com.moko.support.remotegw.entity.OrderCHAR;
 import com.moko.support.remotegw.entity.ParamsKeyEnum;
+import com.moko.support.remotegw.event.MQTTMessageArrivedEvent;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +52,12 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
     private boolean loadDetectionNotifySuc;
     private boolean powerReportIntervalSuc;
 
+    private MokoDevice mMokoDevice;
+    private MQTTConfig appMqttConfig;
+    private String mAppTopic;
+    public Handler mHandler;
+    private boolean isMeteringSwitch;
+
     @Override
     protected ActivityMeteringSettingsBinding getViewBinding() {
         return ActivityMeteringSettingsBinding.inflate(getLayoutInflater());
@@ -41,16 +65,28 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
 
     @Override
     protected void onCreate() {
-        showLoadingProgressDialog();
-        mBind.tvTitle.postDelayed(() -> {
-            List<OrderTask> orderTasks = new ArrayList<>(4);
-            orderTasks.add(OrderTaskAssembler.getMeteringReportEnable());
-            orderTasks.add(OrderTaskAssembler.getPowerReportInterval());
-            orderTasks.add(OrderTaskAssembler.getEnergyReportInterval());
-            orderTasks.add(OrderTaskAssembler.getLoadDetectionNotifyEnable());
-            MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
-        }, 500);
+        mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
+        if (null == mMokoDevice) {
+            showLoadingProgressDialog();
+            mBind.tvTitle.postDelayed(() -> {
+                List<OrderTask> orderTasks = new ArrayList<>(4);
+                orderTasks.add(OrderTaskAssembler.getMeteringReportEnable());
+                orderTasks.add(OrderTaskAssembler.getLoadDetectionNotifyEnable());
+                orderTasks.add(OrderTaskAssembler.getPowerReportInterval());
+                orderTasks.add(OrderTaskAssembler.getEnergyReportInterval());
+                MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
+            }, 500);
+        } else {
+            String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
+            appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
+            mAppTopic = TextUtils.isEmpty(appMqttConfig.topicPublish) ? mMokoDevice.topicSubscribe : appMqttConfig.topicPublish;
+            mHandler = new Handler(Looper.getMainLooper());
+            isMeteringSwitch = getIntent().getBooleanExtra("enable", false);
+            mBind.cbMetering.setChecked(isMeteringSwitch);
+            if (isMeteringSwitch) getLoadState();
+        }
         mBind.cbMetering.setOnCheckedChangeListener((buttonView, isChecked) -> mBind.layoutMetering.setVisibility(isChecked ? View.VISIBLE : View.GONE));
+        mBind.cbDetectionNotify.setOnCheckedChangeListener((buttonView, isChecked) -> mBind.group.setVisibility(isChecked ? View.VISIBLE : View.GONE));
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 100)
@@ -134,6 +170,7 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
                                     if (length == 1) {
                                         int enable = value[4] & 0xff;
                                         mBind.cbDetectionNotify.setChecked(enable == 1);
+                                        mBind.group.setVisibility(enable == 1 ? View.VISIBLE : View.GONE);
                                     }
                                     break;
 
@@ -160,24 +197,223 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMQTTMessageArrivedEvent(MQTTMessageArrivedEvent event) {
+        // 更新所有设备的网络状态
+        final String topic = event.getTopic();
+        final String message = event.getMessage();
+        if (TextUtils.isEmpty(message))
+            return;
+        int msg_id;
+        try {
+            JsonObject object = new Gson().fromJson(message, JsonObject.class);
+            JsonElement element = object.get("msg_id");
+            msg_id = element.getAsInt();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        if (msg_id == MQTTConstants.READ_MSG_ID_LOAD_CHANGE_ENABLE || msg_id == MQTTConstants.NOTIFY_MSG_ID_LOAD_CHANGE_ENABLE) {
+            Type type = new TypeToken<MsgReadResult<JsonObject>>() {
+            }.getType();
+            MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            String key = msg_id == MQTTConstants.READ_MSG_ID_LOAD_CHANGE_ENABLE ? "switch_value" : "load_state";
+            int enable = result.data.get(key).getAsInt();
+            if (enable == 0) {
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
+            }
+            mBind.cbDetectionNotify.setChecked(enable == 1);
+            mBind.group.setVisibility(enable == 1 ? View.VISIBLE : View.GONE);
+            if (enable == 1) {
+                getPowerReportInterval();
+                getEnergyReportInterval();
+            }
+        }
+        if (msg_id == MQTTConstants.READ_MSG_ID_POWER_REPORT_INTERVAL || msg_id == MQTTConstants.READ_MSG_ID_ENERGY_REPORT_INTERVAL) {
+            Type type = new TypeToken<MsgReadResult<JsonObject>>() {
+            }.getType();
+            MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            int interval = result.data.get("interval").getAsInt();
+            dismissLoadingProgressDialog();
+            mHandler.removeMessages(0);
+            if (msg_id == MQTTConstants.READ_MSG_ID_POWER_REPORT_INTERVAL) {
+                mBind.etPowerInterval.setText(String.valueOf(interval));
+                mBind.etPowerInterval.setSelection(mBind.etPowerInterval.getText().length());
+            }
+            if (msg_id == MQTTConstants.READ_MSG_ID_ENERGY_REPORT_INTERVAL) {
+                mBind.etEnergyInterval.setText(String.valueOf(interval));
+                mBind.etEnergyInterval.setSelection(mBind.etEnergyInterval.getText().length());
+            }
+        }
+
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_POWER_METERING_ENABLE) {
+            Type type = new TypeToken<MsgConfigResult>() {
+            }.getType();
+            MsgConfigResult result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            if (!mBind.cbMetering.isChecked()) {
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
+                ToastUtils.showToast(this, result.result_code == 0 ? "Set up succeed" : "Set up failed");
+            } else {
+                //打开状态 继续设置负载开关的状态
+                if (result.result_code == 0) {
+                    setMeteringEnable(mBind.cbDetectionNotify.isChecked() ? 1 : 0, MQTTConstants.CONFIG_MSG_ID_LOAD_CHANGE_ENABLE);
+                } else {
+                    ToastUtils.showToast(this, "Set up failed");
+                    dismissLoadingProgressDialog();
+                    mHandler.removeMessages(0);
+                }
+            }
+        }
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_LOAD_CHANGE_ENABLE) {
+            Type type = new TypeToken<MsgConfigResult>() {
+            }.getType();
+            MsgConfigResult result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            if (!mBind.cbDetectionNotify.isChecked()) {
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
+                ToastUtils.showToast(this, result.result_code == 0 ? "Set up succeed" : "Set up failed");
+            } else {
+                if (result.result_code == 0) {
+                    setPowerEnergyReportInterval(MQTTConstants.CONFIG_MSG_ID_POWER_REPORT_INTERVAL, Integer.parseInt(mBind.etPowerInterval.getText().toString()));
+                } else {
+                    ToastUtils.showToast(this, "Set up failed");
+                    dismissLoadingProgressDialog();
+                    mHandler.removeMessages(0);
+                }
+            }
+        }
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_POWER_REPORT_INTERVAL){
+            Type type = new TypeToken<MsgConfigResult>() {
+            }.getType();
+            MsgConfigResult result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            if (result.result_code == 0){
+                setPowerEnergyReportInterval(MQTTConstants.CONFIG_MSG_ID_ENERGY_REPORT_INTERVAL, Integer.parseInt(mBind.etEnergyInterval.getText().toString()));
+            }else {
+                ToastUtils.showToast(this, "Set up failed");
+                dismissLoadingProgressDialog();
+                mHandler.removeMessages(0);
+            }
+        }
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_ENERGY_REPORT_INTERVAL){
+            Type type = new TypeToken<MsgConfigResult>() {
+            }.getType();
+            MsgConfigResult result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            ToastUtils.showToast(this, result.result_code == 0 ? "Set up succeed" : "Set up failed");
+            dismissLoadingProgressDialog();
+            mHandler.removeMessages(0);
+        }
+    }
+
+    private void setPowerEnergyReportInterval(int msgId, int interval) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("interval", interval);
+        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getPowerReportInterval() {
+        int msgId = MQTTConstants.READ_MSG_ID_POWER_REPORT_INTERVAL;
+        String message = assembleReadCommon(msgId, mMokoDevice.mac);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getEnergyReportInterval() {
+        int msgId = MQTTConstants.READ_MSG_ID_POWER_REPORT_INTERVAL;
+        String message = assembleReadCommon(msgId, mMokoDevice.mac);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getLoadState() {
+        mHandler.postDelayed(() -> {
+            dismissLoadingProgressDialog();
+            finish();
+        }, 30 * 1000);
+        showLoadingProgressDialog();
+        int msgId = MQTTConstants.READ_MSG_ID_LOAD_CHANGE_ENABLE;
+        String message = assembleReadCommon(msgId, mMokoDevice.mac);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void onSave(View view) {
         if (isWindowLocked()) return;
-        showLoadingProgressDialog();
-        if (!mBind.cbMetering.isChecked()) {
-            MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setMeteringReportEnable(0));
-        } else {
-            if (isValid()) {
+        if (null == mMokoDevice) {
+            if (!mBind.cbMetering.isChecked()) {
+                showLoadingProgressDialog();
+                MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setMeteringReportEnable(0));
+            } else {
                 List<OrderTask> orderTasks = new ArrayList<>(4);
                 orderTasks.add(OrderTaskAssembler.setMeteringReportEnable(1));
-                int powerInterval = Integer.parseInt(mBind.etPowerInterval.getText().toString());
-                int energyInterval = Integer.parseInt(mBind.etEnergyInterval.getText().toString());
-                orderTasks.add(OrderTaskAssembler.setLoadDetectionNotifyEnable(mBind.cbDetectionNotify.isChecked() ? 1 : 0));
-                orderTasks.add(OrderTaskAssembler.setPowerReportInterval(powerInterval));
-                orderTasks.add(OrderTaskAssembler.setEnergyReportInterval(energyInterval));
+                if (mBind.cbDetectionNotify.isChecked()) {
+                    if (!isValid()) {
+                        ToastUtils.showToast(this, "Para Error");
+                        return;
+                    }
+                    showLoadingProgressDialog();
+                    int powerInterval = Integer.parseInt(mBind.etPowerInterval.getText().toString());
+                    int energyInterval = Integer.parseInt(mBind.etEnergyInterval.getText().toString());
+                    orderTasks.add(OrderTaskAssembler.setLoadDetectionNotifyEnable(1));
+                    orderTasks.add(OrderTaskAssembler.setPowerReportInterval(powerInterval));
+                    orderTasks.add(OrderTaskAssembler.setEnergyReportInterval(energyInterval));
+                } else {
+                    showLoadingProgressDialog();
+                    orderTasks.add(OrderTaskAssembler.setLoadDetectionNotifyEnable(0));
+                }
                 MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
-            } else {
-                ToastUtils.showToast(this, "Para Error");
             }
+        } else {
+            if (!mBind.cbMetering.isChecked()) {
+                setMeteringEnable(0, MQTTConstants.CONFIG_MSG_ID_POWER_METERING_ENABLE);
+            } else {
+                if (mBind.cbDetectionNotify.isChecked()) {
+                    if (!isValid()) {
+                        ToastUtils.showToast(this, "Para Error");
+                        return;
+                    }
+                }
+                setMeteringEnable(1, MQTTConstants.CONFIG_MSG_ID_POWER_METERING_ENABLE);
+            }
+        }
+    }
+
+    private void setMeteringEnable(int enable, int msgId) {
+        if (msgId == MQTTConstants.CONFIG_MSG_ID_POWER_METERING_ENABLE) {
+            mHandler.postDelayed(() -> {
+                dismissLoadingProgressDialog();
+                finish();
+            }, 30 * 1000);
+            showLoadingProgressDialog();
+        }
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("switch_value", enable);
+        String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
+        try {
+            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
         }
     }
 

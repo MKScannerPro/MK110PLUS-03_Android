@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white_ffffff"
     android:minHeight="300dp"
     android:paddingLeft="12dp"
@@ -28,6 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:visibility="gone"
+        tools:visibility="visible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cb_ssl">
@@ -67,6 +69,7 @@
             android:minHeight="50dp"
             android:orientation="horizontal"
             android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_certification">
@@ -75,7 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:text="CA File"
+                android:text="CA Certificate"
                 android:textColor="@color/black_333333"
                 android:textSize="15sp" />
 
@@ -112,6 +115,7 @@
             android:minHeight="50dp"
             android:orientation="horizontal"
             android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ll_ca">
@@ -157,6 +161,7 @@
             android:minHeight="50dp"
             android:orientation="horizontal"
             android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ll_client_key">
@@ -165,7 +170,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:text="Client Cert File"
+                android:text="Client Certificate"
                 android:textColor="@color/black_333333"
                 android:textSize="15sp" />
 

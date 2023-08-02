@@ -804,4 +804,10 @@ public class OrderTaskAssembler {
         task.setLoadDetectionNotifyEnable(enable);
         return task;
     }
+
+    public static OrderTask setUtcTime(){
+        ParamsTask task = new ParamsTask();
+        task.setCurrentUtcTime();
+        return task;
+    }
 }

@@ -1,4 +1,4 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -34,21 +34,26 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiSettingsBinding> {
     private final String FILTER_ASCII = "[ -~]*";
-    private InputFilter filter;
-
     private ArrayList<String> mSecurityValues;
     private int mSecuritySelected;
     private ArrayList<String> mEAPTypeValues;
     private int mEAPTypeSelected;
-
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-
     public Handler mHandler;
+    private final String[] countryBrand = {"United Arab Emirates", "Argentina", "American Samoa", "Austria", "Australia", "Barbados", "Burkina Faso", "Bermuda",
+            "Brazil", "Bahamas", "Canada", "Central African Republic", "Côte d'Ivoire", "China", "Colombia", "Costa Rica", "Cuba", "Christmas Island", "Dominica",
+            "Dominican Republic", "Ecuador", "Europe", "Micronesia, Federated States of", "France", "Grenada", "Ghana", "Greece", "Guatemala", "Guam", "Guyana", "Honduras",
+            "Haiti", "Jamaica", "Cayman Islands", "Kazakhstan", "Lebanon", "Sri Lanka", "Marshall Islands", "Mongolia", "Macao, SAR China", "Northern Mariana Islands",
+            "Mauritius", "Mexico", "Malaysia", "Nicaragua", "Panama", "Peru", "Papua New Guinea", "Philippines", "Puerto Rico", "Palau", "Paraguay", "Rwanda", "Singapore",
+            "Senegal", "El Salvador", "Syrian Arab Republic (Syria)", "Turks and Caicos Islands", "Thailand", "Trinidad and Tobago", "Taiwan, Republic of China",
+            "Tanzania, United Republic of", "Uganda", "United States of America", "Uruguay", "Venezuela (Bolivarian Republic)", "Virgin Islands,US", "Viet Nam", "Vanuatu"};
+    private int countrySelected;
 
     @Override
     protected void onCreate() {
@@ -63,11 +68,10 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
         mEAPTypeValues.add("PEAP-MSCHAPV2");
         mEAPTypeValues.add("TTLS-MSCHAPV2");
         mEAPTypeValues.add("TLS");
-        filter = (source, start, end, dest, dstart, dend) -> {
+        InputFilter filter = (source, start, end, dest, dstart, dend) -> {
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
             }
-
             return null;
         };
         mBind.etUsername.setFilters(new InputFilter[]{new InputFilter.LengthFilter(32), filter});
@@ -90,6 +94,7 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
         }, 30 * 1000);
         showLoadingProgressDialog();
         getWifiSettings();
+        mBind.tvCountryBrand.setOnClickListener(v -> onSelectCountry());
     }
 
     @Override
@@ -102,8 +107,7 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
         // 更新所有设备的网络状态
         final String topic = event.getTopic();
         final String message = event.getMessage();
-        if (TextUtils.isEmpty(message))
-            return;
+        if (TextUtils.isEmpty(message)) return;
         int msg_id;
         try {
             JsonObject object = new Gson().fromJson(message, JsonObject.class);
@@ -117,8 +121,7 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
-            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
-                return;
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             mSecuritySelected = result.data.get("security_type").getAsInt();
@@ -128,7 +131,8 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
             mBind.tvSecurity.setText(mSecurityValues.get(mSecuritySelected));
             mBind.clEapType.setVisibility(mSecuritySelected != 0 ? View.VISIBLE : View.GONE);
             mBind.clPassword.setVisibility(mSecuritySelected != 0 ? View.GONE : View.VISIBLE);
-
+            countrySelected = result.data.get("country").getAsInt();
+            mBind.tvCountryBrand.setText(countryBrand[countrySelected]);
             mEAPTypeSelected = result.data.get("eap_type").getAsInt();
             mBind.tvEapType.setText(mEAPTypeValues.get(mEAPTypeSelected));
             if (mSecuritySelected != 0) {
@@ -221,6 +225,17 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
         }
     }
 
+    private void onSelectCountry() {
+        if (isWindowLocked()) return;
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas((ArrayList<String>) (Arrays.asList(countryBrand)), countrySelected);
+        dialog.setListener(value -> {
+            countrySelected = value;
+            mBind.tvCountryBrand.setText(countryBrand[value]);
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceOnlineEvent(DeviceOnlineEvent event) {
         super.offline(event, mMokoDevice.mac);
@@ -246,6 +261,7 @@ public class ModifyWifiSettingsActivity extends BaseActivity<ActivityModifyWifiS
         jsonObject.addProperty("eap_username", mSecuritySelected != 0 ? username : "");
         jsonObject.addProperty("eap_passwd", mSecuritySelected != 0 ? eapPassword : "");
         jsonObject.addProperty("eap_verify_server", mBind.cbVerifyServer.isChecked() ? 1 : 0);
+        jsonObject.addProperty("country", countrySelected);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);

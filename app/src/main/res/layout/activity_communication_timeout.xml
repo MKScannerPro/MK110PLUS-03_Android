@@ -65,6 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_margin="12dp"
+        android:lineSpacingMultiplier="1.2"
         android:text="If the gateway doesn't get any downlink message from the cloud in the timeout, it will automatically disconnect from the Beacon.  A value of 0 means that no automatic disconnection."
         android:textColor="@color/black_333333"
         android:textSize="13sp" />

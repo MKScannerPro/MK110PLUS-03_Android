@@ -1,10 +1,12 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.set;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -12,7 +14,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityButtonResetBinding;
+import com.moko.mkremotegw03.databinding.ActivityOtaRemoteBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -20,7 +22,7 @@ import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.support.remotegw.MQTTConstants;
 import com.moko.support.remotegw.MQTTSupport;
 import com.moko.support.remotegw.entity.MsgConfigResult;
-import com.moko.support.remotegw.entity.MsgReadResult;
+import com.moko.support.remotegw.entity.MsgNotify;
 import com.moko.support.remotegw.event.DeviceOnlineEvent;
 import com.moko.support.remotegw.event.MQTTMessageArrivedEvent;
 
@@ -30,33 +32,33 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Type;
 
-
-public class ButtonResetActivity extends BaseActivity<ActivityButtonResetBinding> {
-
+public class OTAActivity extends BaseActivity<ActivityOtaRemoteBinding> {
+    private final String FILTER_ASCII = "[ -~]*";
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
 
-    public Handler mHandler;
+    private Handler mHandler;
 
     @Override
     protected void onCreate() {
+        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
+            if (!(source + "").matches(FILTER_ASCII)) {
+                return "";
+            }
+            return null;
+        };
+        mBind.etFirmwareFileUrl.setFilters(new InputFilter[]{new InputFilter.LengthFilter(256), inputFilter});
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
         mAppTopic = TextUtils.isEmpty(appMqttConfig.topicPublish) ? mMokoDevice.topicSubscribe : appMqttConfig.topicPublish;
         mHandler = new Handler(Looper.getMainLooper());
-        mHandler.postDelayed(() -> {
-            dismissLoadingProgressDialog();
-            finish();
-        }, 30 * 1000);
-        showLoadingProgressDialog();
-        getButtonReset();
     }
 
     @Override
-    protected ActivityButtonResetBinding getViewBinding() {
-        return ActivityButtonResetBinding.inflate(getLayoutInflater());
+    protected ActivityOtaRemoteBinding getViewBinding() {
+        return ActivityOtaRemoteBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -75,44 +77,51 @@ public class ButtonResetActivity extends BaseActivity<ActivityButtonResetBinding
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_BUTTON_RESET) {
-            Type type = new TypeToken<MsgReadResult<JsonObject>>() {
+        if (msg_id == MQTTConstants.READ_MSG_ID_DEVICE_STATUS) {
+            Type type = new TypeToken<MsgNotify<JsonObject>>() {
             }.getType();
-            MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
+            MsgNotify<JsonObject> result = new Gson().fromJson(message, type);
             if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            int resetType = result.data.get("key_reset_type").getAsInt();
-            if (resetType == 1) {
-                mBind.rbFixedTime.setChecked(true);
-            } else if (resetType == 2) {
-                mBind.rbAnyTime.setChecked(true);
+            int status = result.data.get("status").getAsInt();
+            if (status == 1) {
+                ToastUtils.showToast(this, "Device is OTA, please wait");
+                return;
             }
-            mBind.rgButtonReset.setOnCheckedChangeListener((group, checkedId) -> {
-                int value = 1;
-                if (checkedId == R.id.rb_fixed_time) {
-                    value = 1;
-                } else if (checkedId == R.id.rb_any_time) {
-                    value = 2;
-                }
-                mHandler.postDelayed(() -> {
-                    dismissLoadingProgressDialog();
-                    ToastUtils.showToast(this, "Set up failed");
-                }, 30 * 1000);
-                showLoadingProgressDialog();
-                setButtonReset(value);
-            });
-
+            String firmwareFileUrlStr = mBind.etFirmwareFileUrl.getText().toString();
+            XLog.i("升级固件");
+            mHandler.postDelayed(() -> {
+                dismissLoadingProgressDialog();
+                ToastUtils.showToast(this, "Set up failed");
+            }, 50 * 1000);
+            showLoadingProgressDialog();
+            setOTA(firmwareFileUrlStr);
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_BUTTON_RESET) {
+        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA_RESULT) {
+            Type type = new TypeToken<MsgNotify<JsonObject>>() {
+            }.getType();
+            MsgNotify<JsonObject> result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
+                return;
+            dismissLoadingProgressDialog();
+            mHandler.removeMessages(0);
+            int resultCode = result.data.get("result_code").getAsInt();
+            if (resultCode == 1) {
+                ToastUtils.showToast(this, R.string.update_success);
+            } else {
+                ToastUtils.showToast(this, R.string.update_failed);
+            }
+        }
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_OTA) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
             if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac))
                 return;
-            dismissLoadingProgressDialog();
-            mHandler.removeMessages(0);
+//            dismissLoadingProgressDialog();
+//            mHandler.removeMessages(0);
             if (result.result_code == 0) {
                 ToastUtils.showToast(this, "Set up succeed");
             } else {
@@ -130,8 +139,28 @@ public class ButtonResetActivity extends BaseActivity<ActivityButtonResetBinding
         finish();
     }
 
-    private void getButtonReset() {
-        int msgId = MQTTConstants.READ_MSG_ID_BUTTON_RESET;
+    public void onStartUpdate(View view) {
+        if (isWindowLocked()) return;
+        String firmwareFileUrlStr = mBind.etFirmwareFileUrl.getText().toString();
+        if (TextUtils.isEmpty(firmwareFileUrlStr)) {
+            ToastUtils.showToast(this, R.string.mqtt_verify_firmware_file_url);
+            return;
+        }
+        if (!MQTTSupport.getInstance().isConnected()) {
+            ToastUtils.showToast(this, R.string.network_error);
+            return;
+        }
+        XLog.i("查询设备当前状态");
+        mHandler.postDelayed(() -> {
+            dismissLoadingProgressDialog();
+            ToastUtils.showToast(this, "Set up failed");
+        }, 50 * 1000);
+        showLoadingProgressDialog();
+        getDeviceStatus();
+    }
+
+    private void getDeviceStatus() {
+        int msgId = MQTTConstants.READ_MSG_ID_DEVICE_STATUS;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -140,10 +169,10 @@ public class ButtonResetActivity extends BaseActivity<ActivityButtonResetBinding
         }
     }
 
-    private void setButtonReset(int value) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_BUTTON_RESET;
+    private void setOTA(String firmwareFileUrlStr) {
+        int msgId = MQTTConstants.CONFIG_MSG_ID_OTA;
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("key_reset_type", value);
+        jsonObject.addProperty("firmware_url", firmwareFileUrlStr);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -151,5 +180,4 @@ public class ButtonResetActivity extends BaseActivity<ActivityButtonResetBinding
             e.printStackTrace();
         }
     }
-
 }

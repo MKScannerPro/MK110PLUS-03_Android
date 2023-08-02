@@ -46,17 +46,12 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBinding> {
-
     private MQTTConfig mAppMqttConfig;
     private MQTTConfig mDeviceMqttConfig;
-
     private Handler mHandler;
-
     private int mSelectedDeviceType;
-
     private boolean mIsMQTTConfigFinished;
     private boolean mIsWIFIConfigFinished;
-
     private CustomDialog mqttConnDialog;
     private DonutProgress donutProgress;
     private boolean isSettingSuccess;
@@ -75,13 +70,11 @@ public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBindi
         return ActivityDeviceConfigBinding.inflate(getLayoutInflater());
     }
 
-
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 50)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         String action = event.getAction();
         EventBus.getDefault().cancelEventDelivery(event);
-        if (isSettingSuccess)
-            return;
+        if (isSettingSuccess) return;
         if (MokoConstants.ACTION_DISCONNECTED.equals(action)) {
             runOnUiThread(() -> {
                 Intent intent = new Intent();
@@ -102,36 +95,32 @@ public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBindi
             OrderCHAR orderCHAR = (OrderCHAR) response.orderCHAR;
             int responseType = response.responseType;
             byte[] value = response.responseValue;
-            switch (orderCHAR) {
-                case CHAR_PARAMS:
-                    if (value.length >= 4) {
-                        int header = value[0] & 0xFF;// 0xED
-                        int flag = value[1] & 0xFF;// read or write
-                        int cmd = value[2] & 0xFF;
-                        if (header == 0xED) {
-                            ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
-                            if (configKeyEnum == null) {
-                                return;
-                            }
-                            int length = value[3] & 0xFF;
-                            if (flag == 0x01) {
-                                // write
-                                int result = value[4] & 0xFF;
-                                switch (configKeyEnum) {
-                                    case KEY_EXIT_CONFIG_MODE:
-                                        if (result != 1) {
-                                            ToastUtils.showToast(this, "Setup failed！");
-                                        } else {
-                                            isSettingSuccess = true;
-                                            showConnMqttDialog();
-                                            subscribeTopic();
-                                        }
-                                        break;
+            if (orderCHAR == OrderCHAR.CHAR_PARAMS) {
+                if (value.length >= 4) {
+                    int header = value[0] & 0xFF;// 0xED
+                    int flag = value[1] & 0xFF;// read or write
+                    int cmd = value[2] & 0xFF;
+                    if (header == 0xED) {
+                        ParamsKeyEnum configKeyEnum = ParamsKeyEnum.fromParamKey(cmd);
+                        if (configKeyEnum == null) {
+                            return;
+                        }
+                        int length = value[3] & 0xFF;
+                        if (flag == 0x01) {
+                            // write
+                            int result = value[4] & 0xFF;
+                            if (configKeyEnum == ParamsKeyEnum.KEY_EXIT_CONFIG_MODE) {
+                                if (result != 1) {
+                                    ToastUtils.showToast(this, "Setup failed！");
+                                } else {
+                                    isSettingSuccess = true;
+                                    showConnMqttDialog();
+                                    subscribeTopic();
                                 }
                             }
                         }
                     }
-                    break;
+                }
             }
         }
     }
@@ -143,8 +132,7 @@ public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBindi
         if (TextUtils.isEmpty(topic) || isDeviceConnectSuccess) {
             return;
         }
-        if (TextUtils.isEmpty(message))
-            return;
+        if (TextUtils.isEmpty(message)) return;
         int msg_id;
         try {
             JsonObject object = new Gson().fromJson(message, JsonObject.class);
@@ -154,8 +142,7 @@ public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBindi
             e.printStackTrace();
             return;
         }
-        if (msg_id != MQTTConstants.NOTIFY_MSG_ID_NETWORKING_STATUS)
-            return;
+        if (msg_id != MQTTConstants.NOTIFY_MSG_ID_NETWORKING_STATUS) return;
         Type type = new TypeToken<MsgNotify<Object>>() {
         }.getType();
         MsgNotify<Object> msgNotify = new Gson().fromJson(message, type);
@@ -163,8 +150,7 @@ public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBindi
         if (!mDeviceMqttConfig.staMac.equals(mac)) {
             return;
         }
-        if (donutProgress == null)
-            return;
+        if (donutProgress == null) return;
         if (!isDeviceConnectSuccess) {
             isDeviceConnectSuccess = true;
             donutProgress.setProgress(100);
@@ -224,7 +210,8 @@ public class DeviceConfigActivity extends BaseActivity<ActivityDeviceConfigBindi
     }
 
     public void onMeteringSettings(View view){
-
+        if (isWindowLocked()) return;
+        startActivity(new Intent(this, MeteringSettingsActivity.class));
     }
 
     public void onWifiSettings(View view) {

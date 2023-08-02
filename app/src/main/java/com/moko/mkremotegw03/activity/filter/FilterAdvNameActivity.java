@@ -1,8 +1,10 @@
-package com.moko.mkremotegw03.activity;
+package com.moko.mkremotegw03.activity.filter;
 
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +19,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.ActivityFilterBxpTagBinding;
+import com.moko.mkremotegw03.databinding.ActivityFilterAdvNameBinding;
 import com.moko.mkremotegw03.dialog.AlertMessageDialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
@@ -38,7 +40,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBinding> {
+public class FilterAdvNameActivity extends BaseActivity<ActivityFilterAdvNameBinding> {
+
+    private final String FILTER_ASCII = "[ -~]*";
 
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
@@ -46,10 +50,21 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
 
     public Handler mHandler;
 
-    private List<String> filterTagList;
+    private List<String> filterAdvName;
+    private InputFilter filter;
 
     @Override
     protected void onCreate() {
+        filter = new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                if (!(source + "").matches(FILTER_ASCII)) {
+                    return "";
+                }
+
+                return null;
+            }
+        };
         mMokoDevice = (MokoDevice) getIntent().getSerializableExtra(AppConstants.EXTRA_KEY_DEVICE);
         String mqttConfigAppStr = SPUtiles.getStringValue(this, AppConstants.SP_KEY_MQTT_CONFIG_APP, "");
         appMqttConfig = new Gson().fromJson(mqttConfigAppStr, MQTTConfig.class);
@@ -60,12 +75,12 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        getFilterTag();
+        getFilterAdvName();
     }
 
     @Override
-    protected ActivityFilterBxpTagBinding getViewBinding() {
-        return ActivityFilterBxpTagBinding.inflate(getLayoutInflater());
+    protected ActivityFilterAdvNameBinding getViewBinding() {
+        return ActivityFilterAdvNameBinding.inflate(getLayoutInflater());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -84,7 +99,7 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_FILTER_BXP_TAG) {
+        if (msg_id == MQTTConstants.READ_MSG_ID_FILTER_ADV_NAME) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -92,28 +107,28 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
                 return;
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
-            mBind.cbBxpTag.setChecked(result.data.get("switch_value").getAsInt() == 1);
             mBind.cbPreciseMatch.setChecked(result.data.get("precise").getAsInt() == 1);
             mBind.cbReverseFilter.setChecked(result.data.get("reverse").getAsInt() == 1);
-            JsonArray tagList = result.data.getAsJsonArray("tagid");
-            int number = tagList.size();
-            filterTagList = new ArrayList<>();
+            JsonArray macList = result.data.getAsJsonArray("name");
+            int number = macList.size();
+            filterAdvName = new ArrayList<>();
             if (number != 0) {
                 int index = 1;
-                for (JsonElement jsonElement : tagList) {
-                    filterTagList.add(jsonElement.getAsString());
-                    String tagId = jsonElement.getAsString();
-                    View v = LayoutInflater.from(FilterBXPTagActivity.this).inflate(R.layout.item_mac_address_filter, mBind.llTagId, false);
-                    TextView title = v.findViewById(R.id.tv_mac_address_title);
-                    EditText etTadId = v.findViewById(R.id.et_mac_address);
-                    title.setText(String.format("ID %d", index));
-                    etTadId.setText(tagId);
-                    mBind.llTagId.addView(v);
+                for (JsonElement jsonElement : macList) {
+                    filterAdvName.add(jsonElement.getAsString());
+                    String advName = jsonElement.getAsString();
+                    View v = LayoutInflater.from(FilterAdvNameActivity.this).inflate(R.layout.item_adv_name_filter, mBind.llDavName, false);
+                    TextView title = v.findViewById(R.id.tv_adv_name_title);
+                    EditText etAdvName = v.findViewById(R.id.et_adv_name);
+                    etAdvName.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20), filter});
+                    title.setText(String.format("ADV Name%d", index));
+                    etAdvName.setText(advName);
+                    mBind.llDavName.addView(v);
                     index++;
                 }
             }
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_FILTER_BXP_TAG) {
+        if (msg_id == MQTTConstants.CONFIG_MSG_ID_FILTER_ADV_NAME) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -134,18 +149,18 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
         super.offline(event, mMokoDevice.mac);
     }
 
-    private void getFilterTag() {
-        int msgId = MQTTConstants.READ_MSG_ID_FILTER_BXP_TAG;
+    public void back(View view) {
+        finish();
+    }
+
+    private void getFilterAdvName() {
+        int msgId = MQTTConstants.READ_MSG_ID_FILTER_ADV_NAME;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
-    }
-
-    public void onBack(View view) {
-        finish();
     }
 
     public void onSave(View view) {
@@ -163,21 +178,23 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
     public void onAdd(View view) {
         if (isWindowLocked())
             return;
-        int count = mBind.llTagId.getChildCount();
+        int count = mBind.llDavName.getChildCount();
         if (count > 9) {
             ToastUtils.showToast(this, "You can set up to 10 filters!");
             return;
         }
-        View v = LayoutInflater.from(this).inflate(R.layout.item_mac_address_filter, mBind.llTagId, false);
-        TextView title = v.findViewById(R.id.tv_mac_address_title);
-        title.setText(String.format("ID %d", count + 1));
-        mBind.llTagId.addView(v);
+        View v = LayoutInflater.from(this).inflate(R.layout.item_adv_name_filter, mBind.llDavName, false);
+        TextView title = v.findViewById(R.id.tv_adv_name_title);
+        title.setText(String.format("ADV Name%d", count + 1));
+        EditText etAdvName = v.findViewById(R.id.et_adv_name);
+        etAdvName.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20), filter});
+        mBind.llDavName.addView(v);
     }
 
     public void onDel(View view) {
         if (isWindowLocked())
             return;
-        final int c = mBind.llTagId.getChildCount();
+        final int c = mBind.llDavName.getChildCount();
         if (c == 0) {
             ToastUtils.showToast(this, "There are currently no filters to delete");
             return;
@@ -186,9 +203,9 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
         dialog.setTitle("Warning");
         dialog.setMessage("Please confirm whether to delete it, if yes, the last option will be deleted!");
         dialog.setOnAlertConfirmListener(() -> {
-            int count = mBind.llTagId.getChildCount();
+            int count = mBind.llDavName.getChildCount();
             if (count > 0) {
-                mBind.llTagId.removeViewAt(count - 1);
+                mBind.llDavName.removeViewAt(count - 1);
             }
         });
         dialog.show(getSupportFragmentManager());
@@ -196,15 +213,14 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
 
 
     private void saveParams() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_FILTER_BXP_TAG;
+        int msgId = MQTTConstants.CONFIG_MSG_ID_FILTER_ADV_NAME;
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("switch_value", mBind.cbBxpTag.isChecked() ? 1 : 0);
         jsonObject.addProperty("precise", mBind.cbPreciseMatch.isChecked() ? 1 : 0);
         jsonObject.addProperty("reverse", mBind.cbReverseFilter.isChecked() ? 1 : 0);
         JsonArray macList = new JsonArray();
-        for (String mac : filterTagList)
+        for (String mac : filterAdvName)
             macList.add(mac);
-        jsonObject.add("tagid", macList);
+        jsonObject.add("name", macList);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
             MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
@@ -214,32 +230,27 @@ public class FilterBXPTagActivity extends BaseActivity<ActivityFilterBxpTagBindi
     }
 
     private boolean isValid() {
-        final int c = mBind.llTagId.getChildCount();
+        final int c = mBind.llDavName.getChildCount();
         if (c > 0) {
             // 发送设置的过滤RawData
-            int count = mBind.llTagId.getChildCount();
+            int count = mBind.llDavName.getChildCount();
             if (count == 0) {
                 ToastUtils.showToast(this, "Para Error");
                 return false;
             }
-            filterTagList.clear();
+            filterAdvName.clear();
             for (int i = 0; i < count; i++) {
-                View v = mBind.llTagId.getChildAt(i);
-                EditText etMacAddress = v.findViewById(R.id.et_mac_address);
-                final String macAddress = etMacAddress.getText().toString();
-                if (TextUtils.isEmpty(macAddress)) {
+                View v = mBind.llDavName.getChildAt(i);
+                EditText etAdvName = v.findViewById(R.id.et_adv_name);
+                final String advName = etAdvName.getText().toString();
+                if (TextUtils.isEmpty(advName)) {
                     ToastUtils.showToast(this, "Para Error");
                     return false;
                 }
-                int length = macAddress.length();
-                if (length % 2 != 0) {
-                    ToastUtils.showToast(this, "Para Error");
-                    return false;
-                }
-                filterTagList.add(macAddress);
+                filterAdvName.add(advName);
             }
         } else {
-            filterTagList = new ArrayList<>();
+            filterAdvName = new ArrayList<>();
         }
         return true;
     }

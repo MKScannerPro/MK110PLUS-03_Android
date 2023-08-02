@@ -1,5 +1,4 @@
-package com.moko.mkremotegw03.activity;
-
+package com.moko.mkremotegw03.activity.set;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -11,6 +10,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.RadioGroup;
 
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
+
 import com.elvishew.xlog.XLog;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -18,6 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
+import com.moko.mkremotegw03.activity.RemoteMainActivity;
 import com.moko.mkremotegw03.adapter.MQTTFragmentAdapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMqttDeviceModifyRemoteBinding;
@@ -56,31 +59,20 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-import androidx.fragment.app.Fragment;
-import androidx.viewpager2.widget.ViewPager2;
-
 public class ModifyMQTTSettingsActivity extends BaseActivity<ActivityMqttDeviceModifyRemoteBinding> implements RadioGroup.OnCheckedChangeListener {
     public static String TAG = ModifyMQTTSettingsActivity.class.getSimpleName();
     private final String FILTER_ASCII = "[ -~]*";
-
-
     private GeneralDeviceFragment generalFragment;
     private UserDeviceFragment userFragment;
     private SSLDeviceUrlFragment sslFragment;
     private LWTFragment lwtFragment;
-    private MQTTFragmentAdapter adapter;
     private ArrayList<Fragment> fragments;
-
     private MQTTConfig mqttDeviceConfig;
-
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-
     public Handler mHandler;
-
     public InputFilter filter;
-
     private String expertFilePath;
     private boolean isFileError;
     private boolean mIsConfigFinish;
@@ -92,7 +84,6 @@ public class ModifyMQTTSettingsActivity extends BaseActivity<ActivityMqttDeviceM
             if (!(source + "").matches(FILTER_ASCII)) {
                 return "";
             }
-
             return null;
         };
         mBind.etMqttHost.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64), filter});
@@ -101,7 +92,7 @@ public class ModifyMQTTSettingsActivity extends BaseActivity<ActivityMqttDeviceM
         mBind.etMqttPublishTopic.setFilters(new InputFilter[]{new InputFilter.LengthFilter(128), filter});
         createFragment();
         initData();
-        adapter = new MQTTFragmentAdapter(this);
+        MQTTFragmentAdapter adapter = new MQTTFragmentAdapter(this);
         adapter.setFragmentList(fragments);
         mBind.vpMqtt.setAdapter(adapter);
         mBind.vpMqtt.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -131,7 +122,7 @@ public class ModifyMQTTSettingsActivity extends BaseActivity<ActivityMqttDeviceM
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        mBind.etMqttHost.postDelayed(() -> getMqttSettings(), 1000);
+        mBind.etMqttHost.postDelayed(this::getMqttSettings, 1000);
     }
 
 
