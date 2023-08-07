@@ -15,7 +15,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
-import com.moko.mkremotegw03.adapter.BleDeviceAdapter;
+import com.moko.mkremotegw03.adapter.BleDevice03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityBleDevices03Binding;
 import com.moko.mkremotegw03.db.DBTools;
@@ -52,7 +52,7 @@ public class BleManager03Activity extends BaseActivity<ActivityBleDevices03Bindi
     private MokoDevice mMokoDevice;
     private MQTTConfig appMqttConfig;
     private String mAppTopic;
-    private BleDeviceAdapter mAdapter;
+    private BleDevice03Adapter mAdapter;
     private ArrayList<BleDevice> mBleDevices;
     private ConcurrentHashMap<String, BleDevice> mBleDevicesMap;
     private Handler mHandler;
@@ -69,7 +69,7 @@ public class BleManager03Activity extends BaseActivity<ActivityBleDevices03Bindi
         mBind.tvDeviceName.setText(mMokoDevice.name);
         mBleDevices = new ArrayList<>();
         mBleDevicesMap = new ConcurrentHashMap<>();
-        mAdapter = new BleDeviceAdapter();
+        mAdapter = new BleDevice03Adapter();
         mAdapter.openLoadAnimation();
         mAdapter.replaceData(mBleDevices);
         mAdapter.setOnItemChildClickListener(this);

@@ -23,7 +23,7 @@ import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.adapter.MQTTFragmentAdapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMqttDeviceRemote03Binding;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.fragment.GeneralDevice03Fragment;
 import com.moko.mkremotegw03.fragment.LWT03Fragment;
@@ -828,7 +828,7 @@ public class MqttSettings03Activity extends BaseActivity<ActivityMqttDeviceRemot
 
     public void onClearConfig(View view) {
         if (isWindowLocked()) return;
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setMessage("Please confirm whether to delete all configurations in this page?");
         dialog.setConfirm("YES");
         dialog.setCancel("NO");

@@ -9,8 +9,8 @@ import com.moko.mkremotegw03.entity.BleOtherChar;
 
 import java.util.List;
 
-public class BleCharacteristicsAdapter extends BaseMultiItemQuickAdapter<BleOtherChar, BaseViewHolder> {
-    public BleCharacteristicsAdapter(List<BleOtherChar> data) {
+public class BleCharacteristics03Adapter extends BaseMultiItemQuickAdapter<BleOtherChar, BaseViewHolder> {
+    public BleCharacteristics03Adapter(List<BleOtherChar> data) {
         super(data);
         addItemType(0, R.layout.item_service);
         addItemType(1, R.layout.item_characteristics);

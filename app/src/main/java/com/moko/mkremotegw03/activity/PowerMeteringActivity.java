@@ -14,7 +14,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityPowerMeteringBinding;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -76,7 +76,7 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
     }
 
     private void resetEnergyData() {
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setMessage("After reset, energy data will be deleted, please confirm again whether to reset it？");
         dialog.setTitle("Reset Energy Data");
         dialog.setOnAlertConfirmListener(() -> {

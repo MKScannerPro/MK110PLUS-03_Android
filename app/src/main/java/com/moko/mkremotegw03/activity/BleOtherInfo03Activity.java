@@ -15,12 +15,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
-import com.moko.mkremotegw03.adapter.BleCharacteristicsAdapter;
+import com.moko.mkremotegw03.adapter.BleCharacteristics03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityOtherInfo03Binding;
 import com.moko.mkremotegw03.db.DBTools;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
-import com.moko.mkremotegw03.dialog.CharWriteDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
+import com.moko.mkremotegw03.dialog.CharWrite03Dialog;
 import com.moko.mkremotegw03.entity.BleOtherChar;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
@@ -53,7 +53,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
     private OtherDeviceInfo mOtherDeviceInfo;
     private Handler mHandler;
     private ArrayList<BleOtherChar> mBleOtherChars;
-    private BleCharacteristicsAdapter mAdapter;
+    private BleCharacteristics03Adapter mAdapter;
 
     @Override
     protected void onCreate() {
@@ -88,7 +88,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
                 mBleOtherChars.add(bleOtherChar);
             }
         }
-        mAdapter = new BleCharacteristicsAdapter(mBleOtherChars);
+        mAdapter = new BleCharacteristics03Adapter(mBleOtherChars);
         mAdapter.openLoadAnimation();
         mAdapter.setOnItemChildClickListener(this);
         mBind.rvCharacteristics.setLayoutManager(new LinearLayoutManager(this));
@@ -251,7 +251,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
 
     public void onDisconnect(View view) {
         if (isWindowLocked()) return;
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setMessage("Please confirm again whether to disconnect the gateway from BLE devices?");
         dialog.setOnAlertConfirmListener(() -> {
             if (!MQTTSupport03.getInstance().isConnected()) {
@@ -307,7 +307,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
     }
 
     private void openWriteCharValueDialog(BleOtherChar bleOtherChar) {
-        CharWriteDialog dialog = new CharWriteDialog();
+        CharWrite03Dialog dialog = new CharWrite03Dialog();
         dialog.setOnCharWriteClicked(payload -> {
             mHandler.postDelayed(() -> {
                 dismissLoadingProgressDialog();

@@ -102,6 +102,6 @@
         android:layout_weight="1.0"
         android:overScrollMode="never"
         tools:itemCount="3"
-        tools:listitem="@layout/item_ble_device" />
+        tools:listitem="@layout/item_ble_device03" />
 
 </LinearLayout>

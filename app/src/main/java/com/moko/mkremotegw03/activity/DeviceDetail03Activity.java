@@ -16,7 +16,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.activity.set.DeviceSetting03Activity;
-import com.moko.mkremotegw03.adapter.ScanDeviceAdapter;
+import com.moko.mkremotegw03.adapter.ScanDevice03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDetailRemote03Binding;
 import com.moko.mkremotegw03.db.DBTools;
@@ -52,7 +52,7 @@ public class DeviceDetail03Activity extends BaseActivity<ActivityDetailRemote03B
     private String mAppTopic;
 
     private boolean mScanSwitch;
-    private ScanDeviceAdapter mAdapter;
+    private ScanDevice03Adapter mAdapter;
     private ArrayList<String> mScanDevices;
     private Handler mHandler;
     private BXPButtonInfo mConnectedBXPButtonInfo;
@@ -67,7 +67,7 @@ public class DeviceDetail03Activity extends BaseActivity<ActivityDetailRemote03B
 
         mBind.tvDeviceName.setText(mMokoDevice.name);
         mScanDevices = new ArrayList<>();
-        mAdapter = new ScanDeviceAdapter();
+        mAdapter = new ScanDevice03Adapter();
         mAdapter.openLoadAnimation();
         mAdapter.replaceData(mScanDevices);
         mBind.rvDevices.setLayoutManager(new LinearLayoutManager(this));

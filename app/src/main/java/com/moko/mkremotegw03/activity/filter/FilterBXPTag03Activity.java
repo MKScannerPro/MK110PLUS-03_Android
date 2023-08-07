@@ -18,7 +18,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityFilterBxpTag03Binding;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -182,7 +182,7 @@ public class FilterBXPTag03Activity extends BaseActivity<ActivityFilterBxpTag03B
             ToastUtils.showToast(this, "There are currently no filters to delete");
             return;
         }
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setTitle("Warning");
         dialog.setMessage("Please confirm whether to delete it, if yes, the last option will be deleted!");
         dialog.setOnAlertConfirmListener(() -> {

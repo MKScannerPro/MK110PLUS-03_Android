@@ -20,7 +20,7 @@ import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
-import com.moko.mkremotegw03.adapter.DeviceInfoAdapter;
+import com.moko.mkremotegw03.adapter.DeviceInfo03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityScanner03Binding;
 import com.moko.mkremotegw03.dialog.PasswordDialog;
@@ -48,7 +48,7 @@ import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
 public class DeviceScanner03Activity extends BaseActivity<ActivityScanner03Binding> implements MokoScanDeviceCallback, BaseQuickAdapter.OnItemClickListener {
     private Animation animation = null;
-    private DeviceInfoAdapter mAdapter;
+    private DeviceInfo03Adapter mAdapter;
     private ConcurrentHashMap<String, DeviceInfo> mDeviceMap;
     private ArrayList<DeviceInfo> mDevices;
     private Handler mHandler;
@@ -62,7 +62,7 @@ public class DeviceScanner03Activity extends BaseActivity<ActivityScanner03Bindi
     protected void onCreate() {
         mDeviceMap = new ConcurrentHashMap<>();
         mDevices = new ArrayList<>();
-        mAdapter = new DeviceInfoAdapter();
+        mAdapter = new DeviceInfo03Adapter();
         mAdapter.openLoadAnimation();
         mAdapter.replaceData(mDevices);
         mAdapter.setOnItemClickListener(this);

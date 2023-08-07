@@ -24,7 +24,7 @@ import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDeviceConfig03Binding;
 import com.moko.mkremotegw03.db.DBTools;
-import com.moko.mkremotegw03.dialog.CustomDialog;
+import com.moko.mkremotegw03.dialog.Custom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -52,7 +52,7 @@ public class DeviceConfig03Activity extends BaseActivity<ActivityDeviceConfig03B
     private int mSelectedDeviceType;
     private boolean mIsMQTTConfigFinished;
     private boolean mIsWIFIConfigFinished;
-    private CustomDialog mqttConnDialog;
+    private Custom03Dialog mqttConnDialog;
     private DonutProgress donutProgress;
     private boolean isSettingSuccess;
     private boolean isDeviceConnectSuccess;
@@ -276,7 +276,7 @@ public class DeviceConfig03Activity extends BaseActivity<ActivityDeviceConfig03B
         isDeviceConnectSuccess = false;
         View view = LayoutInflater.from(this).inflate(R.layout.mqtt_conn_content, null);
         donutProgress = view.findViewById(R.id.dp_progress);
-        mqttConnDialog = new CustomDialog.Builder(this)
+        mqttConnDialog = new Custom03Dialog.Builder(this)
                 .setContentView(view)
                 .create();
         mqttConnDialog.setCancelable(false);

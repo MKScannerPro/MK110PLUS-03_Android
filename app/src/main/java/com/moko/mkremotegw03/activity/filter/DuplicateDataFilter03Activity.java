@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDuplicateDataFilter03Binding;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.dialog.Bottom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -147,7 +147,7 @@ public class DuplicateDataFilter03Activity extends BaseActivity<ActivityDuplicat
     }
 
     public void onFilterBy(View view) {
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;

@@ -17,7 +17,7 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityWifiSettings03Binding;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.dialog.Bottom03Dialog;
 import com.moko.mkremotegw03.utils.FileUtils;
 import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.support.remotegw03.MokoSupport03;
@@ -265,7 +265,7 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
 
     public void onSelectSecurity(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mSecurityValues, mSecuritySelected);
         dialog.setListener(value -> {
             mSecuritySelected = value;
@@ -300,7 +300,7 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
 
     private void onSelectCountry() {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(new ArrayList<>(Arrays.asList(countryBrand)), countrySelected);
         dialog.setListener(value -> {
             countrySelected = value;
@@ -311,7 +311,7 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
 
     public void onSelectEAPType(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mEAPTypeValues, mEAPTypeSelected);
         dialog.setListener(value -> {
             mEAPTypeSelected = value;

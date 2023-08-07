@@ -15,7 +15,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityModifyWifiSettings03Binding;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.dialog.Bottom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -227,7 +227,7 @@ public class ModifyWifiSettings03Activity extends BaseActivity<ActivityModifyWif
 
     private void onSelectCountry() {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(new ArrayList<>(Arrays.asList(countryBrand)), countrySelected);
         dialog.setListener(value -> {
             countrySelected = value;
@@ -299,7 +299,7 @@ public class ModifyWifiSettings03Activity extends BaseActivity<ActivityModifyWif
 
     public void onSelectSecurity(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mSecurityValues, mSecuritySelected);
         dialog.setListener(value -> {
             mSecuritySelected = value;
@@ -333,7 +333,7 @@ public class ModifyWifiSettings03Activity extends BaseActivity<ActivityModifyWif
 
     public void onSelectEAPType(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mEAPTypeValues, mEAPTypeSelected);
         dialog.setListener(value -> {
             mEAPTypeSelected = value;

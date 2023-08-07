@@ -18,8 +18,8 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityFilterOther03Binding;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
+import com.moko.mkremotegw03.dialog.Bottom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -246,7 +246,7 @@ public class FilterOther03Activity extends BaseActivity<ActivityFilterOther03Bin
             ToastUtils.showToast(this, "There are currently no filters to delete");
             return;
         }
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setTitle("Warning");
         dialog.setMessage("Please confirm whether to delete it, if yes, the last option will be deleted!");
         dialog.setOnAlertConfirmListener(() -> {
@@ -378,7 +378,7 @@ public class FilterOther03Activity extends BaseActivity<ActivityFilterOther03Bin
     public void onOtherRelationship(View view) {
         if (isWindowLocked())
             return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;

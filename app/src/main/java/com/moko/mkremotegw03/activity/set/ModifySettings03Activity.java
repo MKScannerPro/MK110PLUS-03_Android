@@ -21,7 +21,7 @@ import com.moko.mkremotegw03.activity.RemoteMainWithMeteringActivity;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityModifySettings03Binding;
 import com.moko.mkremotegw03.db.DBTools;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -223,7 +223,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
 
     public void onConnect(View view) {
         if (isWindowLocked()) return;
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setMessage("If confirm, device will reboot and use new settings to reconnect");
         dialog.setOnAlertConfirmListener(() -> {
             if (!MQTTSupport03.getInstance().isConnected()) {

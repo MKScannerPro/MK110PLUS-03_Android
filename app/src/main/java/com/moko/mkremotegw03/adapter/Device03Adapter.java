@@ -8,10 +8,10 @@ import com.moko.mkremotegw03.entity.MokoDevice;
 import androidx.core.content.ContextCompat;
 
 
-public class DeviceAdapter extends BaseQuickAdapter<MokoDevice, BaseViewHolder> {
+public class Device03Adapter extends BaseQuickAdapter<MokoDevice, BaseViewHolder> {
 
-    public DeviceAdapter() {
-        super(R.layout.device_item_remote);
+    public Device03Adapter() {
+        super(R.layout.device_item_remote03);
     }
 
     @Override

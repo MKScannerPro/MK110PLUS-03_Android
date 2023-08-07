@@ -5,8 +5,8 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.moko.mkremotegw03.R;
 import com.moko.support.remotegw03.entity.DeviceInfo;
 
-public class DeviceInfoAdapter extends BaseQuickAdapter<DeviceInfo, BaseViewHolder> {
-    public DeviceInfoAdapter() {
+public class DeviceInfo03Adapter extends BaseQuickAdapter<DeviceInfo, BaseViewHolder> {
+    public DeviceInfo03Adapter() {
         super(R.layout.item_devices);
     }
 

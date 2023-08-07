@@ -13,13 +13,13 @@ import android.widget.TextView;
 import com.moko.mkremotegw03.R;
 
 
-public class CustomDialog extends Dialog {
+public class Custom03Dialog extends Dialog {
 
-    public CustomDialog(Context context) {
+    public Custom03Dialog(Context context) {
         super(context);
     }
 
-    public CustomDialog(Context context, int theme) {
+    public Custom03Dialog(Context context, int theme) {
         super(context, theme);
     }
 
@@ -116,12 +116,12 @@ public class CustomDialog extends Dialog {
             return this;
         }
 
-        public CustomDialog create() {
+        public Custom03Dialog create() {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             // instantiate the dialog with the custom Theme  
-            final CustomDialog dialog = new CustomDialog(context, R.style.Dialog);
-            View layout = inflater.inflate(R.layout.dialog_normal_layout, null);
+            final Custom03Dialog dialog = new Custom03Dialog(context, R.style.Dialog);
+            View layout = inflater.inflate(R.layout.dialog_normal_layout03, null);
             dialog.addContentView(layout, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             // set the dialog title

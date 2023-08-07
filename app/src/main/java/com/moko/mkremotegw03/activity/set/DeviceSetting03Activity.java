@@ -25,8 +25,8 @@ import com.moko.mkremotegw03.activity.RemoteMainWithMeteringActivity;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDeviceSettingRemote03Binding;
 import com.moko.mkremotegw03.db.DBTools;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
-import com.moko.mkremotegw03.dialog.CustomDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
+import com.moko.mkremotegw03.dialog.Custom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -214,7 +214,7 @@ public class DeviceSetting03Activity extends BaseActivity<ActivityDeviceSettingR
         etDeviceName.setText(deviceName);
         etDeviceName.setSelection(deviceName.length());
         etDeviceName.setFilters(new InputFilter[]{filter, new InputFilter.LengthFilter(20)});
-        CustomDialog dialog = new CustomDialog.Builder(this)
+        Custom03Dialog dialog = new Custom03Dialog.Builder(this)
                 .setContentView(content)
                 .setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
@@ -394,7 +394,7 @@ public class DeviceSetting03Activity extends BaseActivity<ActivityDeviceSettingR
 
     public void onRebootDevice(View view) {
         if (isWindowLocked()) return;
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setTitle("Reboot Device");
         dialog.setMessage("Please confirm again whether to \n reboot the device");
         dialog.setOnAlertConfirmListener(() -> {
@@ -427,7 +427,7 @@ public class DeviceSetting03Activity extends BaseActivity<ActivityDeviceSettingR
 
     public void onResetDevice(View view) {
         if (isWindowLocked()) return;
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setTitle("Reset Device");
         dialog.setMessage("After reset,the device will be removed  from the device list,and relevant data will be totally cleared.");
         dialog.setOnAlertConfirmListener(() -> {

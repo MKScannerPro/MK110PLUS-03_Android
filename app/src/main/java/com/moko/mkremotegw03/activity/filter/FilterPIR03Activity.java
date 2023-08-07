@@ -13,7 +13,7 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityFilterPir03Binding;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.dialog.Bottom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -258,7 +258,7 @@ public class FilterPIR03Activity extends BaseActivity<ActivityFilterPir03Binding
 
     public void onDelayRespStatus(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mDelayRespStatusValues, mDelayRespStatusSelected);
         dialog.setListener(value -> {
             mDelayRespStatusSelected = value;
@@ -269,7 +269,7 @@ public class FilterPIR03Activity extends BaseActivity<ActivityFilterPir03Binding
 
     public void onDoorStatus(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mDoorStatusValues, mDoorStatusSelected);
         dialog.setListener(value -> {
             mDoorStatusSelected = value;
@@ -280,7 +280,7 @@ public class FilterPIR03Activity extends BaseActivity<ActivityFilterPir03Binding
 
     public void onSensorSensitivity(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mSensorSensitivityValues, mSensorSensitivitySelected);
         dialog.setListener(value -> {
             mSensorSensitivitySelected = value;
@@ -291,7 +291,7 @@ public class FilterPIR03Activity extends BaseActivity<ActivityFilterPir03Binding
 
     public void onDetectionStatus(View view) {
         if (isWindowLocked()) return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mDetectionStatusValues, mDetectionStatusSelected);
         dialog.setListener(value -> {
             mDetectionStatusSelected = value;

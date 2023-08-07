@@ -18,7 +18,7 @@ import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityAdvertiseIbeacon03Binding;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.dialog.Bottom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -95,7 +95,7 @@ public class AdvertiseIBeacon03Activity extends BaseActivity<ActivityAdvertiseIb
         }
         mBind.tvTxPowerVal.setOnClickListener(v -> {
             if (isWindowLocked()) return;
-            BottomDialog dialog = new BottomDialog();
+            Bottom03Dialog dialog = new Bottom03Dialog();
             dialog.setDatas(new ArrayList<>(Arrays.asList(txPowerArr)), mSelected);
             dialog.setListener(value -> {
                 mSelected = value;

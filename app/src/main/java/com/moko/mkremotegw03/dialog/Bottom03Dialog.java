@@ -4,19 +4,19 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.moko.mkremotegw03.databinding.DialogBottomRemoteBinding;
+import com.moko.mkremotegw03.databinding.DialogBottomRemote03Binding;
 
 import java.util.ArrayList;
 
-public class BottomDialog extends MokoBaseDialog<DialogBottomRemoteBinding> {
+public class Bottom03Dialog extends MokoBaseDialog<DialogBottomRemote03Binding> {
 
 
     private ArrayList<String> mDatas;
     private int mIndex;
 
     @Override
-    protected DialogBottomRemoteBinding getViewBind(LayoutInflater inflater, ViewGroup container) {
-        return DialogBottomRemoteBinding.inflate(inflater, container, false);
+    protected DialogBottomRemote03Binding getViewBind(LayoutInflater inflater, ViewGroup container) {
+        return DialogBottomRemote03Binding.inflate(inflater, container, false);
     }
 
     @Override

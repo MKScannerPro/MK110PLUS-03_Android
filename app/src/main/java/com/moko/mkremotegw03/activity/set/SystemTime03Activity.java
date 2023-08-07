@@ -14,7 +14,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivitySystemTimePro03Binding;
-import com.moko.mkremotegw03.dialog.BottomDialog;
+import com.moko.mkremotegw03.dialog.Bottom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -213,7 +213,7 @@ public class SystemTime03Activity extends BaseActivity<ActivitySystemTimePro03Bi
     public void onSelectTimeZone(View view) {
         if (isWindowLocked())
             return;
-        BottomDialog dialog = new BottomDialog();
+        Bottom03Dialog dialog = new Bottom03Dialog();
         dialog.setDatas(mTimeZones, mSelectedTimeZone);
         dialog.setListener(value -> {
             if (!MQTTSupport03.getInstance().isConnected()) {

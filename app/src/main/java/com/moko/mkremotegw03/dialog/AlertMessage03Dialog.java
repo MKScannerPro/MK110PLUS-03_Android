@@ -7,14 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.moko.mkremotegw03.R;
-import com.moko.mkremotegw03.databinding.DialogAlertBinding;
-
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 
-public class AlertMessageDialog extends MokoBaseDialog<DialogAlertBinding> {
-    public static final String TAG = AlertMessageDialog.class.getSimpleName();
+import com.moko.mkremotegw03.R;
+import com.moko.mkremotegw03.databinding.DialogAlert03Binding;
+
+public class AlertMessage03Dialog extends MokoBaseDialog<DialogAlert03Binding> {
+    public static final String TAG = AlertMessage03Dialog.class.getSimpleName();
     private String cancel;
     private String confirm;
     private String title;
@@ -27,8 +27,8 @@ public class AlertMessageDialog extends MokoBaseDialog<DialogAlertBinding> {
     private int messageTextColorId = -1;
 
     @Override
-    protected DialogAlertBinding getViewBind(LayoutInflater inflater, ViewGroup container) {
-        return DialogAlertBinding.inflate(inflater, container, false);
+    protected DialogAlert03Binding getViewBind(LayoutInflater inflater, ViewGroup container) {
+        return DialogAlert03Binding.inflate(inflater, container, false);
     }
 
     @Override

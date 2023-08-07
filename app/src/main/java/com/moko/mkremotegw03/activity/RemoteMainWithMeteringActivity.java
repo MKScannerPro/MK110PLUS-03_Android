@@ -24,11 +24,11 @@ import com.moko.mkremotegw03.BuildConfig;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.activity.set.DeviceSetting03Activity;
 import com.moko.mkremotegw03.activity.set.ModifySettings03Activity;
-import com.moko.mkremotegw03.adapter.DeviceAdapter;
+import com.moko.mkremotegw03.adapter.Device03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMainRemoteWithMeteringBinding;
 import com.moko.mkremotegw03.db.DBTools;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -63,7 +63,7 @@ import java.util.ArrayList;
 
 public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRemoteWithMeteringBinding> implements BaseQuickAdapter.OnItemClickListener, BaseQuickAdapter.OnItemLongClickListener {
     private ArrayList<MokoDevice> devices;
-    private DeviceAdapter adapter;
+    private Device03Adapter adapter;
     public Handler mHandler;
     public String mAppMqttConfigStr;
     private MQTTConfig mAppMqttConfig;
@@ -85,7 +85,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
         MokoSupport03.getInstance().init(getApplicationContext());
         MQTTSupport03.getInstance().init(getApplicationContext());
         devices = DBTools.getInstance(this).selectAllDevice();
-        adapter = new DeviceAdapter();
+        adapter = new Device03Adapter();
         adapter.openLoadAnimation();
         adapter.replaceData(devices);
         adapter.setOnItemClickListener(this);
@@ -321,7 +321,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
         MokoDevice mokoDevice = (MokoDevice) adapter.getItem(position);
         if (mokoDevice == null)
             return true;
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setTitle("Remove Device");
         dialog.setMessage("Please confirm again whether to \n remove the device");
         dialog.setOnAlertConfirmListener(() -> {
@@ -500,7 +500,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
         if (BuildConfig.IS_LIBRARY) {
             finish();
         } else {
-            AlertMessageDialog dialog = new AlertMessageDialog();
+            AlertMessage03Dialog dialog = new AlertMessage03Dialog();
             dialog.setMessage(R.string.main_exit_tips);
             dialog.setOnAlertConfirmListener(() -> finish());
             dialog.show(getSupportFragmentManager());

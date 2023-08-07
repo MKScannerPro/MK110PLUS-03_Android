@@ -18,7 +18,7 @@ import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityBxpButtonInfo03Binding;
 import com.moko.mkremotegw03.db.DBTools;
-import com.moko.mkremotegw03.dialog.AlertMessageDialog;
+import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -237,7 +237,7 @@ public class BXPButtonInfo03Activity extends BaseActivity<ActivityBxpButtonInfo0
 
     public void onDisconnect(View view) {
         if (isWindowLocked()) return;
-        AlertMessageDialog dialog = new AlertMessageDialog();
+        AlertMessage03Dialog dialog = new AlertMessage03Dialog();
         dialog.setMessage("Please confirm again whether to disconnect the gateway from BLE devices?");
         dialog.setOnAlertConfirmListener(() -> {
             if (!MQTTSupport03.getInstance().isConnected()) {
