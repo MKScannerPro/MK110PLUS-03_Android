@@ -24,7 +24,7 @@ import com.moko.mkremotegw03.activity.DataReportTimeout03Activity;
 import com.moko.mkremotegw03.activity.RemoteMainWithMeteringActivity;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDeviceSettingRemote03Binding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.dialog.Custom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
@@ -173,7 +173,7 @@ public class DeviceSetting03Activity extends BaseActivity<ActivityDeviceSettingR
                         e.printStackTrace();
                     }
                 }
-                DBTools.getInstance(this).deleteDevice(mMokoDevice);
+                DBTools03.getInstance(this).deleteDevice(mMokoDevice);
                 EventBus.getDefault().post(new DeviceDeletedEvent(mMokoDevice.id));
                 mBind.tvName.postDelayed(() -> {
                     dismissLoadingProgressDialog();
@@ -191,7 +191,7 @@ public class DeviceSetting03Activity extends BaseActivity<ActivityDeviceSettingR
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceModifyNameEvent(DeviceModifyNameEvent event) {
         // 修改了设备名称
-        MokoDevice device = DBTools.getInstance(this).selectDevice(mMokoDevice.mac);
+        MokoDevice device = DBTools03.getInstance(this).selectDevice(mMokoDevice.mac);
         mMokoDevice.name = device.name;
         mBind.tvName.setText(mMokoDevice.name);
     }
@@ -231,7 +231,7 @@ public class DeviceSetting03Activity extends BaseActivity<ActivityDeviceSettingR
                             return;
                         }
                         mMokoDevice.name = name;
-                        DBTools.getInstance(DeviceSetting03Activity.this).updateDevice(mMokoDevice);
+                        DBTools03.getInstance(DeviceSetting03Activity.this).updateDevice(mMokoDevice);
                         EventBus.getDefault().post(new DeviceModifyNameEvent(mMokoDevice.mac));
                         etDeviceName.setText(name);
                         dialog.dismiss();

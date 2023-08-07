@@ -7,14 +7,14 @@ import android.util.Log;
 
 import com.elvishew.xlog.XLog;
 
-public class DBOpenHelper extends SQLiteOpenHelper {
-    private static final String DB_NAME = "MKRemoteGW";
+public class DBOpenHelper03 extends SQLiteOpenHelper {
+    private static final String DB_NAME = "MKRemoteGW03";
     // 数据库版本号
     private static final int DB_VERSION = 1;
 
     private Context mContext;
 
-    public DBOpenHelper(Context context) {
+    public DBOpenHelper03(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
         mContext = context;
     }
@@ -22,7 +22,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_DEVICE);
-        Log.i("MKRemoteGW", "创建数据库");
+        Log.i("MKRemoteGW03", "创建数据库");
     }
 
     /**
@@ -48,25 +48,25 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
     // 设备表
     private static final String CREATE_TABLE_DEVICE = "CREATE TABLE "
-            + DBConstants.TABLE_NAME_DEVICE
+            + DBConstants03.TABLE_NAME_DEVICE
             // id
-            + " (" + DBConstants.DEVICE_FIELD_ID
+            + " (" + DBConstants03.DEVICE_FIELD_ID
             + " INTEGER primary key autoincrement, "
             // 名字
-            + DBConstants.DEVICE_FIELD_NAME + " TEXT,"
+            + DBConstants03.DEVICE_FIELD_NAME + " TEXT,"
             // MAC
-            + DBConstants.DEVICE_FIELD_MAC + " TEXT,"
+            + DBConstants03.DEVICE_FIELD_MAC + " TEXT,"
             // mqtt信息
-            + DBConstants.DEVICE_FIELD_MQTT_INFO + " TEXT,"
+            + DBConstants03.DEVICE_FIELD_MQTT_INFO + " TEXT,"
             // 遗愿开关
-            + DBConstants.DEVICE_FIELD_LWT_ENABLE + " TEXT,"
+            + DBConstants03.DEVICE_FIELD_LWT_ENABLE + " TEXT,"
             // 遗愿主题
-            + DBConstants.DEVICE_FIELD_LWT_TOPIC + " TEXT,"
+            + DBConstants03.DEVICE_FIELD_LWT_TOPIC + " TEXT,"
             // 发布主题
-            + DBConstants.DEVICE_FIELD_TOPIC_PUBLISH + " TEXT,"
+            + DBConstants03.DEVICE_FIELD_TOPIC_PUBLISH + " TEXT,"
             // 订阅主题
-            + DBConstants.DEVICE_FIELD_TOPIC_SUBSCRIBE + " TEXT,"
+            + DBConstants03.DEVICE_FIELD_TOPIC_SUBSCRIBE + " TEXT,"
             // 设备类型
-            + DBConstants.DEVICE_FIELD_DEVICE_TYPE + " INTEGER);";
+            + DBConstants03.DEVICE_FIELD_DEVICE_TYPE + " INTEGER);";
 
 }

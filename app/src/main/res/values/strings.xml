@@ -79,7 +79,7 @@
     <string name="indicator_settings">Indicator settings</string>
     <string name="network_status_report_interval">Network status report interval</string>
     <string name="reconnect_timeout">Reconnect timeout</string>
-    <string name="communication_timeout">Communicate timeout</string>
+    <string name="communicate_timeout">Communicate timeout</string>
     <string name="data_report_timeout">Data report timeout</string>
     <string name="system_time">System time</string>
     <string name="modify_network_settings">Modify Network Settings</string>

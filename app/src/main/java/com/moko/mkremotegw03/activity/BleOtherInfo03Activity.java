@@ -18,7 +18,7 @@ import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.adapter.BleCharacteristics03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityOtherInfo03Binding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.dialog.CharWrite03Dialog;
 import com.moko.mkremotegw03.entity.BleOtherChar;
@@ -216,7 +216,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceModifyNameEvent(DeviceModifyNameEvent event) {
         // 修改了设备名称
-        MokoDevice device = DBTools.getInstance(BleOtherInfo03Activity.this).selectDevice(mMokoDevice.mac);
+        MokoDevice device = DBTools03.getInstance(BleOtherInfo03Activity.this).selectDevice(mMokoDevice.mac);
         mMokoDevice.name = device.name;
         mBind.tvDeviceName.setText(mMokoDevice.name);
     }

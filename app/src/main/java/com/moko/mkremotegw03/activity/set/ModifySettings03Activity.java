@@ -20,7 +20,7 @@ import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.activity.RemoteMainWithMeteringActivity;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityModifySettings03Binding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
@@ -139,7 +139,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
                 mqttConfig.lwtTopic =  mqttDeviceConfig.lwtTopic;
                 mqttConfig.lwtPayload = mqttDeviceConfig.lwtPayload;
                 mMokoDevice.mqttInfo = new Gson().toJson(mqttConfig, MQTTConfig.class);
-                DBTools.getInstance(this).updateDevice(mMokoDevice);
+                DBTools03.getInstance(this).updateDevice(mMokoDevice);
                 mBind.tvName.postDelayed(() -> {
                     dismissLoadingProgressDialog();
                     mHandler.removeMessages(0);

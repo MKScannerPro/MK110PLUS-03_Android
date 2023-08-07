@@ -19,7 +19,7 @@ import com.moko.mkremotegw03.activity.set.DeviceSetting03Activity;
 import com.moko.mkremotegw03.adapter.ScanDevice03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDetailRemote03Binding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
@@ -246,7 +246,7 @@ public class DeviceDetail03Activity extends BaseActivity<ActivityDetailRemote03B
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceModifyNameEvent(DeviceModifyNameEvent event) {
         // 修改了设备名称
-        MokoDevice device = DBTools.getInstance(DeviceDetail03Activity.this).selectDevice(mMokoDevice.mac);
+        MokoDevice device = DBTools03.getInstance(DeviceDetail03Activity.this).selectDevice(mMokoDevice.mac);
         mMokoDevice.name = device.name;
         mBind.tvDeviceName.setText(mMokoDevice.name);
     }

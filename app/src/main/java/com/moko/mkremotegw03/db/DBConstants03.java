@@ -1,6 +1,6 @@
 package com.moko.mkremotegw03.db;
 
-public class DBConstants {
+public class DBConstants03 {
     // 设备
     public static final String TABLE_NAME_DEVICE = "device";
     public static final String DEVICE_FIELD_ID = "id";

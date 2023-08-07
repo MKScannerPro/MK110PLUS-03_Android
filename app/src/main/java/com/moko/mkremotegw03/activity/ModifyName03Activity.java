@@ -12,7 +12,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityModifyDeviceName03Binding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.support.remotegw03.event.MQTTConnectionCompleteEvent;
@@ -57,7 +57,7 @@ public class ModifyName03Activity extends BaseActivity<ActivityModifyDeviceName0
             return;
         }
         device.name = name;
-        DBTools.getInstance(this).updateDevice(device);
+        DBTools03.getInstance(this).updateDevice(device);
         // 跳转首页，刷新数据
         Intent intent = new Intent(this, RemoteMainWithMeteringActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_FROM_ACTIVITY, TAG);

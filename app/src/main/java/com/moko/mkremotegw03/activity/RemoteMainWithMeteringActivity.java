@@ -27,7 +27,7 @@ import com.moko.mkremotegw03.activity.set.ModifySettings03Activity;
 import com.moko.mkremotegw03.adapter.Device03Adapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMainRemoteWithMeteringBinding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
@@ -84,7 +84,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
         }
         MokoSupport03.getInstance().init(getApplicationContext());
         MQTTSupport03.getInstance().init(getApplicationContext());
-        devices = DBTools.getInstance(this).selectAllDevice();
+        devices = DBTools03.getInstance(this).selectAllDevice();
         adapter = new Device03Adapter();
         adapter.openLoadAnimation();
         adapter.replaceData(devices);
@@ -175,7 +175,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
         if (!devices.isEmpty()) {
             for (MokoDevice device : devices) {
                 if (device.mac.equals(event.getMac())) {
-                    device.name = DBTools.getInstance(this).selectDevice(device.mac).name;
+                    device.name = DBTools03.getInstance(this).selectDevice(device.mac).name;
                     break;
                 }
             }
@@ -203,7 +203,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
             if (ModifyName03Activity.TAG.equals(from)
                     || DeviceSetting03Activity.TAG.equals(from)) {
                 devices.clear();
-                devices.addAll(DBTools.getInstance(this).selectAllDevice());
+                devices.addAll(DBTools03.getInstance(this).selectAllDevice());
                 if (!TextUtils.isEmpty(mac)) {
                     for (final MokoDevice device : devices) {
                         if (mac.equals(device.mac)) {
@@ -233,7 +233,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
             }
             if (ModifySettings03Activity.TAG.equals(from)) {
                 if (!TextUtils.isEmpty(mac)) {
-                    MokoDevice mokoDevice = DBTools.getInstance(this).selectDevice(mac);
+                    MokoDevice mokoDevice = DBTools03.getInstance(this).selectDevice(mac);
                     for (final MokoDevice device : devices) {
                         if (mac.equals(device.mac)) {
                             if (TextUtils.isEmpty(mAppMqttConfig.topicSubscribe)) {
@@ -343,7 +343,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
                 }
             }
             XLog.i(String.format("删除设备:%s", mokoDevice.name));
-            DBTools.getInstance(RemoteMainWithMeteringActivity.this).deleteDevice(mokoDevice);
+            DBTools03.getInstance(RemoteMainWithMeteringActivity.this).deleteDevice(mokoDevice);
             EventBus.getDefault().post(new DeviceDeletedEvent(mokoDevice.id));
             devices.remove(mokoDevice);
             adapter.replaceData(devices);

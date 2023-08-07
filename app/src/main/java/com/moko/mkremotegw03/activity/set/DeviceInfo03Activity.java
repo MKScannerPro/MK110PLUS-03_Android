@@ -81,8 +81,8 @@ public class DeviceInfo03Activity extends BaseActivity<ActivityDeviceInformation
             mBind.tvDeviceHardwareVersion.setText(result.data.get("hardware_version").getAsString());
             mBind.tvDeviceSoftwareVersion.setText(result.data.get("software_version").getAsString());
             mBind.tvDeviceFirmwareVersion.setText(result.data.get("firmware_version").getAsString());
-            mBind.tvDeviceStaMac.setText(result.device_info.mac);
-            mBind.tvDeviceBtMac.setText(result.data.get("ble_mac").getAsString());
+            mBind.tvDeviceStaMac.setText(result.device_info.mac.toUpperCase());
+            mBind.tvDeviceBtMac.setText(result.data.get("ble_mac").getAsString().toUpperCase());
         }
     }
 

@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@string/communication_timeout"
+            android:text="@string/communicate_timeout"
             android:textColor="@color/white_ffffff"
             android:textSize="17sp" />
 
@@ -40,7 +40,6 @@
             android:paddingRight="16dp"
             android:src="@drawable/ic_save" />
     </RelativeLayout>
-
 
     <EditText
         android:id="@+id/et_communication_timeout"

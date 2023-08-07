@@ -23,7 +23,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDeviceConfig03Binding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.dialog.Custom03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
@@ -158,7 +158,7 @@ public class DeviceConfig03Activity extends BaseActivity<ActivityDeviceConfig03B
             // 关闭进度条弹框，保存数据，跳转修改设备名称页面
             mBind.tvName.postDelayed(() -> {
                 dismissConnMqttDialog();
-                MokoDevice mokoDevice = DBTools.getInstance(DeviceConfig03Activity.this).selectDeviceByMac(mDeviceMqttConfig.staMac);
+                MokoDevice mokoDevice = DBTools03.getInstance(DeviceConfig03Activity.this).selectDeviceByMac(mDeviceMqttConfig.staMac);
                 String mqttConfigStr = new Gson().toJson(mDeviceMqttConfig, MQTTConfig.class);
                 if (mokoDevice == null) {
                     mokoDevice = new MokoDevice();
@@ -170,7 +170,7 @@ public class DeviceConfig03Activity extends BaseActivity<ActivityDeviceConfig03B
                     mokoDevice.lwtEnable = mDeviceMqttConfig.lwtEnable ? 1 : 0;
                     mokoDevice.lwtTopic = mDeviceMqttConfig.lwtTopic;
                     mokoDevice.deviceType = mSelectedDeviceType;
-                    DBTools.getInstance(DeviceConfig03Activity.this).insertDevice(mokoDevice);
+                    DBTools03.getInstance(DeviceConfig03Activity.this).insertDevice(mokoDevice);
                 } else {
                     mokoDevice.name = mDeviceMqttConfig.deviceName;
                     mokoDevice.mac = mDeviceMqttConfig.staMac;
@@ -180,7 +180,7 @@ public class DeviceConfig03Activity extends BaseActivity<ActivityDeviceConfig03B
                     mokoDevice.lwtEnable = mDeviceMqttConfig.lwtEnable ? 1 : 0;
                     mokoDevice.lwtTopic = mDeviceMqttConfig.lwtTopic;
                     mokoDevice.deviceType = mSelectedDeviceType;
-                    DBTools.getInstance(DeviceConfig03Activity.this).updateDevice(mokoDevice);
+                    DBTools03.getInstance(DeviceConfig03Activity.this).updateDevice(mokoDevice);
                 }
                 Intent modifyIntent = new Intent(DeviceConfig03Activity.this, ModifyName03Activity.class);
                 modifyIntent.putExtra(AppConstants.EXTRA_KEY_DEVICE, mokoDevice);

@@ -17,7 +17,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityBxpButtonInfo03Binding;
-import com.moko.mkremotegw03.db.DBTools;
+import com.moko.mkremotegw03.db.DBTools03;
 import com.moko.mkremotegw03.dialog.AlertMessage03Dialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
@@ -180,7 +180,7 @@ public class BXPButtonInfo03Activity extends BaseActivity<ActivityBxpButtonInfo0
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDeviceModifyNameEvent(DeviceModifyNameEvent event) {
         // 修改了设备名称
-        MokoDevice device = DBTools.getInstance(BXPButtonInfo03Activity.this).selectDevice(mMokoDevice.mac);
+        MokoDevice device = DBTools03.getInstance(BXPButtonInfo03Activity.this).selectDevice(mMokoDevice.mac);
         mMokoDevice.name = device.name;
         mBind.tvDeviceName.setText(mMokoDevice.name);
     }
