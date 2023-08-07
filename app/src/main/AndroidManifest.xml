@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.moko.mkremotegw03.activity.RemoteMainActivity"
+            android:name="com.moko.mkremotegw03.activity.RemoteMainWithMeteringActivity"
             android:configChanges="orientation|keyboard|keyboardHidden|locale|layoutDirection"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"

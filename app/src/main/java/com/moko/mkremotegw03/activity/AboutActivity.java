@@ -10,7 +10,7 @@ import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityAboutBinding;
 import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.mkremotegw03.utils.Utils;
-import com.moko.support.remotegw.event.MQTTConnectionCompleteEvent;
+import com.moko.support.remotegw03.event.MQTTConnectionCompleteEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -48,9 +48,9 @@ public class AboutActivity extends BaseActivity<ActivityAboutBinding> {
     public void onFeedbackLog(View view) {
         if (isWindowLocked())
             return;
-        File trackerLog = new File(RemoteMainActivity.PATH_LOGCAT + File.separator + "MKRemoteGW.txt");
-        File trackerLogBak = new File(RemoteMainActivity.PATH_LOGCAT + File.separator + "MKRemoteGW.txt.bak");
-        File trackerCrashLog = new File(RemoteMainActivity.PATH_LOGCAT + File.separator + "crash_log.txt");
+        File trackerLog = new File(RemoteMainWithMeteringActivity.PATH_LOGCAT + File.separator + "MKRemoteGW.txt");
+        File trackerLogBak = new File(RemoteMainWithMeteringActivity.PATH_LOGCAT + File.separator + "MKRemoteGW.txt.bak");
+        File trackerCrashLog = new File(RemoteMainWithMeteringActivity.PATH_LOGCAT + File.separator + "crash_log.txt");
         if (!trackerLog.exists() || !trackerLog.canRead()) {
             ToastUtils.showToast(this, "File is not exists!");
             return;

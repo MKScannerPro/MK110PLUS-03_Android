@@ -24,9 +24,9 @@ import com.moko.mkremotegw03.utils.FileUtils;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.mkremotegw03.utils.Utils;
-import com.moko.support.remotegw.MQTTSupport;
-import com.moko.support.remotegw.event.MQTTConnectionCompleteEvent;
-import com.moko.support.remotegw.event.MQTTConnectionFailureEvent;
+import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.event.MQTTConnectionCompleteEvent;
+import com.moko.support.remotegw03.event.MQTTConnectionFailureEvent;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -105,7 +105,7 @@ public class SetAppMQTTActivity extends BaseActivity<ActivityMqttAppRemoteBindin
         });
         mBind.vpMqtt.setOffscreenPageLimit(3);
         mBind.rgMqtt.setOnCheckedChangeListener(this);
-        expertFilePath = RemoteMainActivity.PATH_LOGCAT + File.separator + "export" + File.separator + "Settings for APP.xlsx";
+        expertFilePath = RemoteMainWithMeteringActivity.PATH_LOGCAT + File.separator + "export" + File.separator + "Settings for APP.xlsx";
     }
 
     @Override

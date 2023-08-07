@@ -12,10 +12,10 @@ import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityNtpSettingsBinding;
 import com.moko.mkremotegw03.dialog.BottomDialog;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw.MokoSupport;
-import com.moko.support.remotegw.OrderTaskAssembler;
-import com.moko.support.remotegw.entity.OrderCHAR;
-import com.moko.support.remotegw.entity.ParamsKeyEnum;
+import com.moko.support.remotegw03.MokoSupport;
+import com.moko.support.remotegw03.OrderTaskAssembler;
+import com.moko.support.remotegw03.entity.OrderCHAR;
+import com.moko.support.remotegw03.entity.ParamsKeyEnum;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;

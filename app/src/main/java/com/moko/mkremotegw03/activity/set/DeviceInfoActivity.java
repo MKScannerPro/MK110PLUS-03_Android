@@ -15,11 +15,11 @@ import com.moko.mkremotegw03.databinding.ActivityDeviceInformationBinding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
-import com.moko.support.remotegw.MQTTConstants;
-import com.moko.support.remotegw.MQTTSupport;
-import com.moko.support.remotegw.entity.MsgReadResult;
-import com.moko.support.remotegw.event.DeviceOnlineEvent;
-import com.moko.support.remotegw.event.MQTTMessageArrivedEvent;
+import com.moko.support.remotegw03.MQTTConstants;
+import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.entity.MsgReadResult;
+import com.moko.support.remotegw03.event.DeviceOnlineEvent;
+import com.moko.support.remotegw03.event.MQTTMessageArrivedEvent;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.Subscribe;

@@ -21,7 +21,7 @@ import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.activity.AdvertiseIBeaconActivity;
 import com.moko.mkremotegw03.activity.DataReportTimeoutActivity;
-import com.moko.mkremotegw03.activity.RemoteMainActivity;
+import com.moko.mkremotegw03.activity.RemoteMainWithMeteringActivity;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDeviceSettingRemoteBinding;
 import com.moko.mkremotegw03.db.DBTools;
@@ -31,14 +31,14 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw.MQTTConstants;
-import com.moko.support.remotegw.MQTTSupport;
-import com.moko.support.remotegw.entity.MsgConfigResult;
-import com.moko.support.remotegw.entity.MsgReadResult;
-import com.moko.support.remotegw.event.DeviceDeletedEvent;
-import com.moko.support.remotegw.event.DeviceModifyNameEvent;
-import com.moko.support.remotegw.event.DeviceOnlineEvent;
-import com.moko.support.remotegw.event.MQTTMessageArrivedEvent;
+import com.moko.support.remotegw03.MQTTConstants;
+import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.entity.MsgConfigResult;
+import com.moko.support.remotegw03.entity.MsgReadResult;
+import com.moko.support.remotegw03.event.DeviceDeletedEvent;
+import com.moko.support.remotegw03.event.DeviceModifyNameEvent;
+import com.moko.support.remotegw03.event.DeviceOnlineEvent;
+import com.moko.support.remotegw03.event.MQTTMessageArrivedEvent;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.greenrobot.eventbus.EventBus;
@@ -178,7 +178,7 @@ public class DeviceSettingActivity extends BaseActivity<ActivityDeviceSettingRem
                 mBind.tvName.postDelayed(() -> {
                     dismissLoadingProgressDialog();
                     // 跳转首页，刷新数据
-                    Intent intent = new Intent(this, RemoteMainActivity.class);
+                    Intent intent = new Intent(this, RemoteMainWithMeteringActivity.class);
                     intent.putExtra(AppConstants.EXTRA_KEY_FROM_ACTIVITY, TAG);
                     startActivity(intent);
                 }, 500);

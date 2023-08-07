@@ -28,11 +28,11 @@ import com.moko.mkremotegw03.fragment.UserDeviceFragment;
 import com.moko.mkremotegw03.utils.FileUtils;
 import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.mkremotegw03.utils.Utils;
-import com.moko.support.remotegw.MokoSupport;
-import com.moko.support.remotegw.OrderTaskAssembler;
-import com.moko.support.remotegw.entity.OrderCHAR;
-import com.moko.support.remotegw.entity.ParamsKeyEnum;
-import com.moko.support.remotegw.entity.ParamsLongKeyEnum;
+import com.moko.support.remotegw03.MokoSupport;
+import com.moko.support.remotegw03.OrderTaskAssembler;
+import com.moko.support.remotegw03.entity.OrderCHAR;
+import com.moko.support.remotegw03.entity.ParamsKeyEnum;
+import com.moko.support.remotegw03.entity.ParamsLongKeyEnum;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -104,7 +104,7 @@ public class MqttSettingsActivity extends BaseActivity<ActivityMqttDeviceRemoteB
         });
         mBind.vpMqtt.setOffscreenPageLimit(4);
         mBind.rgMqtt.setOnCheckedChangeListener(this);
-        expertFilePath = RemoteMainActivity.PATH_LOGCAT + File.separator + "export" + File.separator + "Settings for Device.xlsx";
+        expertFilePath = RemoteMainWithMeteringActivity.PATH_LOGCAT + File.separator + "export" + File.separator + "Settings for Device.xlsx";
         showLoadingProgressDialog();
         mBind.title.postDelayed(() -> {
             ArrayList<OrderTask> orderTasks = new ArrayList<>();

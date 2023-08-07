@@ -16,7 +16,7 @@ import com.moko.mkremotegw03.databinding.ActivityModifyDeviceNameBinding;
 import com.moko.mkremotegw03.db.DBTools;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw.event.MQTTConnectionCompleteEvent;
+import com.moko.support.remotegw03.event.MQTTConnectionCompleteEvent;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -66,7 +66,7 @@ public class ModifyNameActivity extends BaseActivity<ActivityModifyDeviceNameBin
         device.name = name;
         DBTools.getInstance(this).updateDevice(device);
         // 跳转首页，刷新数据
-        Intent intent = new Intent(this, RemoteMainActivity.class);
+        Intent intent = new Intent(this, RemoteMainWithMeteringActivity.class);
         intent.putExtra(AppConstants.EXTRA_KEY_FROM_ACTIVITY, TAG);
         intent.putExtra(AppConstants.EXTRA_KEY_MAC, device.mac);
         startActivity(intent);
