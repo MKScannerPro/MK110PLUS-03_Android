@@ -20,8 +20,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgNotify;
 import com.moko.support.remotegw03.event.DeviceOnlineEvent;
@@ -81,7 +81,7 @@ public class OTA03Activity extends BaseActivity<ActivityOtaRemote03Binding> {
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_DEVICE_STATUS) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_DEVICE_STATUS) {
             Type type = new TypeToken<MsgNotify<JsonObject>>() {
             }.getType();
             MsgNotify<JsonObject> result = new Gson().fromJson(message, type);
@@ -100,9 +100,9 @@ public class OTA03Activity extends BaseActivity<ActivityOtaRemote03Binding> {
                 ToastUtils.showToast(this, "Set up failed");
             }, 50 * 1000);
             showLoadingProgressDialog();
-            setOTA(firmwareFileUrlStr, otaType == 0 ? MQTTConstants.CONFIG_MSG_ID_OTA : MQTTConstants.CONFIG_MSG_ID_OTA_BLE);
+            setOTA(firmwareFileUrlStr, otaType == 0 ? MQTTConstants03.CONFIG_MSG_ID_OTA : MQTTConstants03.CONFIG_MSG_ID_OTA_BLE);
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA_RESULT || msg_id == MQTTConstants.NOTIFY_MSG_ID_OTA_BLE_RESULT) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_OTA_RESULT || msg_id == MQTTConstants03.NOTIFY_MSG_ID_OTA_BLE_RESULT) {
             Type type = new TypeToken<MsgNotify<JsonObject>>() {
             }.getType();
             MsgNotify<JsonObject> result = new Gson().fromJson(message, type);
@@ -116,7 +116,7 @@ public class OTA03Activity extends BaseActivity<ActivityOtaRemote03Binding> {
                 ToastUtils.showToast(this, R.string.update_failed);
             }
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_OTA || msg_id == MQTTConstants.CONFIG_MSG_ID_OTA_BLE) {
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_OTA || msg_id == MQTTConstants03.CONFIG_MSG_ID_OTA_BLE) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -158,7 +158,7 @@ public class OTA03Activity extends BaseActivity<ActivityOtaRemote03Binding> {
             ToastUtils.showToast(this, R.string.mqtt_verify_firmware_file_url);
             return;
         }
-        if (!MQTTSupport.getInstance().isConnected()) {
+        if (!MQTTSupport03.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -172,10 +172,10 @@ public class OTA03Activity extends BaseActivity<ActivityOtaRemote03Binding> {
     }
 
     private void getDeviceStatus() {
-        int msgId = MQTTConstants.READ_MSG_ID_DEVICE_STATUS;
+        int msgId = MQTTConstants03.READ_MSG_ID_DEVICE_STATUS;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -186,7 +186,7 @@ public class OTA03Activity extends BaseActivity<ActivityOtaRemote03Binding> {
         jsonObject.addProperty("firmware_url", firmwareFileUrlStr);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

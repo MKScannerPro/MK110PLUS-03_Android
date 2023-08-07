@@ -26,8 +26,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgReadResult;
 import com.moko.support.remotegw03.event.DeviceOnlineEvent;
@@ -86,7 +86,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_MQTT_SETTINGS) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_MQTT_SETTINGS) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -110,7 +110,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
             mqttDeviceConfig.lwtTopic = result.data.get("lwt_topic").getAsString();
             mqttDeviceConfig.lwtPayload = result.data.get("lwt_payload").getAsString();
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_REBOOT) {
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_REBOOT) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -171,7 +171,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
     public void onWifiSettings(View view) {
         if (isWindowLocked())
             return;
-        if (!MQTTSupport.getInstance().isConnected()) {
+        if (!MQTTSupport03.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -183,7 +183,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
     public void onMqttSettings(View view) {
         if (isWindowLocked())
             return;
-        if (!MQTTSupport.getInstance().isConnected()) {
+        if (!MQTTSupport03.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -202,7 +202,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
 
     public void onNetworkSettings(View view) {
         if (isWindowLocked()) return;
-        if (!MQTTSupport.getInstance().isConnected()) {
+        if (!MQTTSupport03.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }
@@ -212,10 +212,10 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
     }
 
     private void getMqttSettings() {
-        int msgId = MQTTConstants.READ_MSG_ID_MQTT_SETTINGS;
+        int msgId = MQTTConstants03.READ_MSG_ID_MQTT_SETTINGS;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -226,7 +226,7 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
         AlertMessageDialog dialog = new AlertMessageDialog();
         dialog.setMessage("If confirm, device will reboot and use new settings to reconnect");
         dialog.setOnAlertConfirmListener(() -> {
-            if (!MQTTSupport.getInstance().isConnected()) {
+            if (!MQTTSupport03.getInstance().isConnected()) {
                 ToastUtils.showToast(this, R.string.network_error);
                 return;
             }
@@ -242,12 +242,12 @@ public class ModifySettings03Activity extends BaseActivity<ActivityModifySetting
 
     private void rebootDevice() {
         XLog.i("重启设备");
-        int msgId = MQTTConstants.CONFIG_MSG_ID_REBOOT;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_REBOOT;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("reset", 0);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

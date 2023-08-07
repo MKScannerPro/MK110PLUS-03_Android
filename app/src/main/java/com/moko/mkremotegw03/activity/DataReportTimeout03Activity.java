@@ -17,8 +17,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgReadResult;
 import com.moko.support.remotegw03.event.DeviceOnlineEvent;
@@ -74,7 +74,7 @@ public class DataReportTimeout03Activity extends BaseActivity<ActivityDataReport
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_DATA_REPORT_TIMEOUT) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_DATA_REPORT_TIMEOUT) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -85,7 +85,7 @@ public class DataReportTimeout03Activity extends BaseActivity<ActivityDataReport
             int timeout = result.data.get("timeout").getAsInt();
             mBind.etDataReportTimeout.setText(String.valueOf(timeout));
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_DATA_REPORT_TIMEOUT) {
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_DATA_REPORT_TIMEOUT) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -111,12 +111,12 @@ public class DataReportTimeout03Activity extends BaseActivity<ActivityDataReport
     }
 
     private void setDataReportTimeout(int timeout) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_DATA_REPORT_TIMEOUT;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_DATA_REPORT_TIMEOUT;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("timeout", timeout);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -124,10 +124,10 @@ public class DataReportTimeout03Activity extends BaseActivity<ActivityDataReport
 
 
     private void getDataReportTimeout() {
-        int msgId = MQTTConstants.READ_MSG_ID_DATA_REPORT_TIMEOUT;
+        int msgId = MQTTConstants03.READ_MSG_ID_DATA_REPORT_TIMEOUT;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -145,7 +145,7 @@ public class DataReportTimeout03Activity extends BaseActivity<ActivityDataReport
             ToastUtils.showToast(this, "Para Error");
             return;
         }
-        if (!MQTTSupport.getInstance().isConnected()) {
+        if (!MQTTSupport03.getInstance().isConnected()) {
             ToastUtils.showToast(this, R.string.network_error);
             return;
         }

@@ -17,8 +17,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgReadResult;
 import com.moko.support.remotegw03.event.DeviceOnlineEvent;
@@ -79,7 +79,7 @@ public class ModifyNetworkSettings03Activity extends BaseActivity<ActivityNetwor
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_NETWORK_SETTINGS) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_NETWORK_SETTINGS) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -95,7 +95,7 @@ public class ModifyNetworkSettings03Activity extends BaseActivity<ActivityNetwor
             mBind.etGateway.setText(result.data.get("gw").getAsString());
             mBind.etDns.setText(result.data.get("dns").getAsString());
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_NETWORK_SETTINGS) {
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_NETWORK_SETTINGS) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -120,7 +120,7 @@ public class ModifyNetworkSettings03Activity extends BaseActivity<ActivityNetwor
     }
 
     private void setNetworkSettings() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_NETWORK_SETTINGS;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_NETWORK_SETTINGS;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("dhcp_en", mBind.cbDhcp.isChecked() ? 1 : 0);
         jsonObject.addProperty("ip", mBind.etIp.getText().toString());
@@ -129,17 +129,17 @@ public class ModifyNetworkSettings03Activity extends BaseActivity<ActivityNetwor
         jsonObject.addProperty("dns", mBind.etDns.getText().toString());
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
     private void getNetworkSettings() {
-        int msgId = MQTTConstants.READ_MSG_ID_NETWORK_SETTINGS;
+        int msgId = MQTTConstants03.READ_MSG_ID_NETWORK_SETTINGS;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -148,7 +148,7 @@ public class ModifyNetworkSettings03Activity extends BaseActivity<ActivityNetwor
     public void onSave(View view) {
         if (isWindowLocked()) return;
         if (!isParaError()) {
-            if (!MQTTSupport.getInstance().isConnected()) {
+            if (!MQTTSupport03.getInstance().isConnected()) {
                 ToastUtils.showToast(this, R.string.network_error);
                 return;
             }

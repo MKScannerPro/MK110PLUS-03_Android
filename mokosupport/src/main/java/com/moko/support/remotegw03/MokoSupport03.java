@@ -21,22 +21,22 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class MokoSupport extends MokoBleLib {
+public class MokoSupport03 extends MokoBleLib {
     private HashMap<OrderCHAR, BluetoothGattCharacteristic> mCharacteristicMap;
 
-    private static volatile MokoSupport INSTANCE;
+    private static volatile MokoSupport03 INSTANCE;
 
     private Context mContext;
 
-    private MokoSupport() {
+    private MokoSupport03() {
         //no instance
     }
 
-    public static MokoSupport getInstance() {
+    public static MokoSupport03 getInstance() {
         if (INSTANCE == null) {
-            synchronized (MokoSupport.class) {
+            synchronized (MokoSupport03.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new MokoSupport();
+                    INSTANCE = new MokoSupport03();
                 }
             }
         }

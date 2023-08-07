@@ -9,11 +9,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.FragmentSslDeviceRemoteBinding;
+import com.moko.mkremotegw03.databinding.FragmentSslDeviceRemote03Binding;
 import com.moko.mkremotegw03.dialog.BottomDialog;
 import com.moko.mkremotegw03.utils.FileUtils;
 import com.moko.mkremotegw03.utils.ToastUtils;
@@ -21,17 +23,14 @@ import com.moko.mkremotegw03.utils.ToastUtils;
 import java.io.File;
 import java.util.ArrayList;
 
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-public class SSLDeviceFragment extends Fragment {
+public class SSLDevice03Fragment extends Fragment {
     public static final int REQUEST_CODE_SELECT_CA = 0x10;
     public static final int REQUEST_CODE_SELECT_CLIENT_KEY = 0x11;
     public static final int REQUEST_CODE_SELECT_CLIENT_CERT = 0x12;
 
-    private static final String TAG = SSLDeviceFragment.class.getSimpleName();
+    private static final String TAG = SSLDevice03Fragment.class.getSimpleName();
 
-    private FragmentSslDeviceRemoteBinding mBind;
+    private FragmentSslDeviceRemote03Binding mBind;
 
 
     private BaseActivity activity;
@@ -45,11 +44,11 @@ public class SSLDeviceFragment extends Fragment {
     private ArrayList<String> values;
     private int selected;
 
-    public SSLDeviceFragment() {
+    public SSLDevice03Fragment() {
     }
 
-    public static SSLDeviceFragment newInstance() {
-        SSLDeviceFragment fragment = new SSLDeviceFragment();
+    public static SSLDevice03Fragment newInstance() {
+        SSLDevice03Fragment fragment = new SSLDevice03Fragment();
         return fragment;
     }
 
@@ -63,20 +62,17 @@ public class SSLDeviceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
-        mBind = FragmentSslDeviceRemoteBinding.inflate(inflater, container, false);
+        mBind = FragmentSslDeviceRemote03Binding.inflate(inflater, container, false);
         activity = (BaseActivity) getActivity();
         mBind.clCertificate.setVisibility(mConnectMode > 0 ? View.VISIBLE : View.GONE);
         mBind.cbSsl.setChecked(mConnectMode > 0);
-        mBind.cbSsl.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!isChecked) {
-                    mConnectMode = 0;
-                } else {
-                    mConnectMode = selected + 1;
-                }
-                mBind.clCertificate.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        mBind.cbSsl.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked) {
+                mConnectMode = 0;
+            } else {
+                mConnectMode = selected + 1;
             }
+            mBind.clCertificate.setVisibility(isChecked ? View.VISIBLE : View.GONE);
         });
         values = new ArrayList<>();
         values.add("CA signed server certificate");

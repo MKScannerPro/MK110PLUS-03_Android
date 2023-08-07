@@ -23,8 +23,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgReadResult;
 import com.moko.support.remotegw03.event.DeviceOnlineEvent;
@@ -84,7 +84,7 @@ public class FilterBXPTag03Activity extends BaseActivity<ActivityFilterBxpTag03B
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_FILTER_BXP_TAG) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_FILTER_BXP_TAG) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -113,7 +113,7 @@ public class FilterBXPTag03Activity extends BaseActivity<ActivityFilterBxpTag03B
                 }
             }
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_FILTER_BXP_TAG) {
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_FILTER_BXP_TAG) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -135,10 +135,10 @@ public class FilterBXPTag03Activity extends BaseActivity<ActivityFilterBxpTag03B
     }
 
     private void getFilterTag() {
-        int msgId = MQTTConstants.READ_MSG_ID_FILTER_BXP_TAG;
+        int msgId = MQTTConstants03.READ_MSG_ID_FILTER_BXP_TAG;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -196,7 +196,7 @@ public class FilterBXPTag03Activity extends BaseActivity<ActivityFilterBxpTag03B
 
 
     private void saveParams() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_FILTER_BXP_TAG;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_FILTER_BXP_TAG;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("switch_value", mBind.cbBxpTag.isChecked() ? 1 : 0);
         jsonObject.addProperty("precise", mBind.cbPreciseMatch.isChecked() ? 1 : 0);
@@ -207,7 +207,7 @@ public class FilterBXPTag03Activity extends BaseActivity<ActivityFilterBxpTag03B
         jsonObject.add("tagid", macList);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

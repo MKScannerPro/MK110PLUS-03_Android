@@ -25,14 +25,14 @@ import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMqttDeviceRemote03Binding;
 import com.moko.mkremotegw03.dialog.AlertMessageDialog;
 import com.moko.mkremotegw03.entity.MQTTConfig;
-import com.moko.mkremotegw03.fragment.GeneralDeviceFragment;
-import com.moko.mkremotegw03.fragment.LWTFragment;
-import com.moko.mkremotegw03.fragment.SSLDeviceFragment;
-import com.moko.mkremotegw03.fragment.UserDeviceFragment;
+import com.moko.mkremotegw03.fragment.GeneralDevice03Fragment;
+import com.moko.mkremotegw03.fragment.LWT03Fragment;
+import com.moko.mkremotegw03.fragment.SSLDevice03Fragment;
+import com.moko.mkremotegw03.fragment.UserDevice03Fragment;
 import com.moko.mkremotegw03.utils.FileUtils;
 import com.moko.mkremotegw03.utils.ToastUtils;
 import com.moko.mkremotegw03.utils.Utils;
-import com.moko.support.remotegw03.MokoSupport;
+import com.moko.support.remotegw03.MokoSupport03;
 import com.moko.support.remotegw03.OrderTaskAssembler;
 import com.moko.support.remotegw03.entity.OrderCHAR;
 import com.moko.support.remotegw03.entity.ParamsKeyEnum;
@@ -55,10 +55,10 @@ import java.util.Arrays;
 
 public class MqttSettings03Activity extends BaseActivity<ActivityMqttDeviceRemote03Binding> implements RadioGroup.OnCheckedChangeListener {
     private final String FILTER_ASCII = "[ -~]*";
-    private GeneralDeviceFragment generalFragment;
-    private UserDeviceFragment userFragment;
-    private SSLDeviceFragment sslFragment;
-    private LWTFragment lwtFragment;
+    private GeneralDevice03Fragment generalFragment;
+    private UserDevice03Fragment userFragment;
+    private SSLDevice03Fragment sslFragment;
+    private LWT03Fragment lwtFragment;
     private MQTTFragmentAdapter adapter;
     private ArrayList<Fragment> fragments;
     private MQTTConfig mqttDeviceConfig;
@@ -126,7 +126,7 @@ public class MqttSettings03Activity extends BaseActivity<ActivityMqttDeviceRemot
             orderTasks.add(OrderTaskAssembler.getMQTTLwtQos());
             orderTasks.add(OrderTaskAssembler.getMQTTLwtTopic());
             orderTasks.add(OrderTaskAssembler.getMQTTLwtPayload());
-            MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+            MokoSupport03.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         }, 500);
 
     }
@@ -328,10 +328,10 @@ public class MqttSettings03Activity extends BaseActivity<ActivityMqttDeviceRemot
 
     private void createFragment() {
         fragments = new ArrayList<>();
-        generalFragment = GeneralDeviceFragment.newInstance();
-        userFragment = UserDeviceFragment.newInstance();
-        sslFragment = SSLDeviceFragment.newInstance();
-        lwtFragment = LWTFragment.newInstance();
+        generalFragment = GeneralDevice03Fragment.newInstance();
+        userFragment = UserDevice03Fragment.newInstance();
+        sslFragment = SSLDevice03Fragment.newInstance();
+        lwtFragment = LWT03Fragment.newInstance();
         fragments.add(generalFragment);
         fragments.add(userFragment);
         fragments.add(sslFragment);
@@ -492,7 +492,7 @@ public class MqttSettings03Activity extends BaseActivity<ActivityMqttDeviceRemot
                 File caFile = new File(mqttDeviceConfig.caPath);
                 orderTasks.add(OrderTaskAssembler.setCA(caFile));
             }
-            MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+            MokoSupport03.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         } catch (Exception e) {
             ToastUtils.showToast(this, "File is missing");
         }

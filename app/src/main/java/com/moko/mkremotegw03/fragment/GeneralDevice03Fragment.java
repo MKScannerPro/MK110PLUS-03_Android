@@ -7,27 +7,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.FragmentGeneralDeviceRemoteBinding;
-import com.moko.mkremotegw03.utils.ToastUtils;
-
 import androidx.fragment.app.Fragment;
 
-public class GeneralDeviceFragment extends Fragment {
+import com.moko.mkremotegw03.base.BaseActivity;
+import com.moko.mkremotegw03.databinding.FragmentGeneralDeviceRemote03Binding;
+import com.moko.mkremotegw03.utils.ToastUtils;
 
-    private static final String TAG = GeneralDeviceFragment.class.getSimpleName();
-    private FragmentGeneralDeviceRemoteBinding mBind;
+public class GeneralDevice03Fragment extends Fragment {
+
+    private static final String TAG = GeneralDevice03Fragment.class.getSimpleName();
+    private FragmentGeneralDeviceRemote03Binding mBind;
     private BaseActivity activity;
 
     private boolean cleanSession;
     private int qos;
     private int keepAlive;
 
-    public GeneralDeviceFragment() {
+    public GeneralDevice03Fragment() {
     }
 
-    public static GeneralDeviceFragment newInstance() {
-        GeneralDeviceFragment fragment = new GeneralDeviceFragment();
+    public static GeneralDevice03Fragment newInstance() {
+        GeneralDevice03Fragment fragment = new GeneralDevice03Fragment();
         return fragment;
     }
 
@@ -41,7 +41,7 @@ public class GeneralDeviceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
-        mBind = FragmentGeneralDeviceRemoteBinding.inflate(inflater, container, false);
+        mBind = FragmentGeneralDeviceRemote03Binding.inflate(inflater, container, false);
         activity = (BaseActivity) getActivity();
         mBind.cbCleanSession.setChecked(cleanSession);
         if (qos == 0) {

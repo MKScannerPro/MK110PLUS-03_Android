@@ -1,6 +1,6 @@
 package com.moko.support.remotegw03;
 
-public class MQTTConstants {
+public class MQTTConstants03 {
     // CONFIG
     public static final int CONFIG_MSG_ID_REBOOT = 1000;
     public static final int CONFIG_MSG_ID_BUTTON_RESET = 1001;

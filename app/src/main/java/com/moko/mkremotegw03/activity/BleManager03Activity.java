@@ -25,9 +25,9 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
-import com.moko.support.remotegw03.MokoSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
+import com.moko.support.remotegw03.MokoSupport03;
 import com.moko.support.remotegw03.entity.BXPButtonInfo;
 import com.moko.support.remotegw03.entity.BleDevice;
 import com.moko.support.remotegw03.entity.MsgNotify;
@@ -113,7 +113,7 @@ public class BleManager03Activity extends BaseActivity<ActivityBleDevices03Bindi
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_SCAN_RESULT) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_SCAN_RESULT) {
             EventBus.getDefault().cancelEventDelivery(event);
             runOnUiThread(() -> {
                 Type type = new TypeToken<MsgNotify<List<BleDevice>>>() {
@@ -136,7 +136,7 @@ public class BleManager03Activity extends BaseActivity<ActivityBleDevices03Bindi
                 }
             });
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_BXP_BUTTON_CONNECT_RESULT) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_BXP_BUTTON_CONNECT_RESULT) {
             runOnUiThread(() -> {
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
@@ -156,7 +156,7 @@ public class BleManager03Activity extends BaseActivity<ActivityBleDevices03Bindi
                 startActivity(intent);
             });
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_OTHER_CONNECT_RESULT) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_OTHER_CONNECT_RESULT) {
             runOnUiThread(() -> {
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
@@ -309,8 +309,8 @@ public class BleManager03Activity extends BaseActivity<ActivityBleDevices03Bindi
             // show password
             final PasswordRemoteBleDialog dialog = new PasswordRemoteBleDialog();
             dialog.setOnPasswordClicked(password -> {
-                if (!MokoSupport.getInstance().isBluetoothOpen()) {
-                    MokoSupport.getInstance().enableBluetooth();
+                if (!MokoSupport03.getInstance().isBluetoothOpen()) {
+                    MokoSupport03.getInstance().enableBluetooth();
                     return;
                 }
                 XLog.i(password);
@@ -334,25 +334,25 @@ public class BleManager03Activity extends BaseActivity<ActivityBleDevices03Bindi
     }
 
     private void getBleDeviceInfo(BleDevice bleDevice, String password) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_BLE_BXP_BUTTON_CONNECT;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_BLE_BXP_BUTTON_CONNECT;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("mac", bleDevice.mac);
         jsonObject.addProperty("passwd", password);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
     private void getBleDeviceInfo(BleDevice bleDevice) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_BLE_OTHER_CONNECT;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_BLE_OTHER_CONNECT;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("mac", bleDevice.mac);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

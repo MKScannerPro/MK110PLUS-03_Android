@@ -26,8 +26,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.BleCharResponse;
 import com.moko.support.remotegw03.entity.BleCharacteristic;
 import com.moko.support.remotegw03.entity.BleService;
@@ -116,7 +116,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_OTHER_CHANGE_NOTIFY_ENABLE) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_OTHER_CHANGE_NOTIFY_ENABLE) {
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             Type type = new TypeToken<MsgNotify<BleCharResponse>>() {
@@ -141,7 +141,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
             mAdapter.replaceData(mBleOtherChars);
             ToastUtils.showToast(this, "Setup succeed!");
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_OTHER_READ_CHAR_VALUE) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_OTHER_READ_CHAR_VALUE) {
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             Type type = new TypeToken<MsgNotify<BleCharResponse>>() {
@@ -166,7 +166,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
             mAdapter.replaceData(mBleOtherChars);
             ToastUtils.showToast(this, "Setup succeed!");
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_OTHER_NOTIFY_CHAR_VALUE) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_OTHER_NOTIFY_CHAR_VALUE) {
             Type type = new TypeToken<MsgNotify<BleCharResponse>>() {
             }.getType();
             MsgNotify<BleCharResponse> result = new Gson().fromJson(message, type);
@@ -184,7 +184,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
             }
             mAdapter.replaceData(mBleOtherChars);
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_OTHER_WRITE_CHAR_VALUE) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_OTHER_WRITE_CHAR_VALUE) {
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             Type type = new TypeToken<MsgNotify<BleCharResponse>>() {
@@ -199,8 +199,8 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
             }
             ToastUtils.showToast(this, "Setup succeed!");
         }
-        if (msg_id == MQTTConstants.NOTIFY_MSG_ID_BLE_OTHER_DISCONNECTED
-                || msg_id == MQTTConstants.CONFIG_MSG_ID_BLE_DISCONNECT) {
+        if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_OTHER_DISCONNECTED
+                || msg_id == MQTTConstants03.CONFIG_MSG_ID_BLE_DISCONNECT) {
             dismissLoadingProgressDialog();
             mHandler.removeMessages(0);
             Type type = new TypeToken<MsgNotify<JsonObject>>() {
@@ -254,7 +254,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
         AlertMessageDialog dialog = new AlertMessageDialog();
         dialog.setMessage("Please confirm again whether to disconnect the gateway from BLE devices?");
         dialog.setOnAlertConfirmListener(() -> {
-            if (!MQTTSupport.getInstance().isConnected()) {
+            if (!MQTTSupport03.getInstance().isConnected()) {
                 ToastUtils.showToast(this, R.string.network_error);
                 return;
             }
@@ -269,12 +269,12 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
     }
 
     private void disconnectDevice() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_BLE_DISCONNECT;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_BLE_DISCONNECT;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("mac", mOtherDeviceInfo.mac);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -320,7 +320,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
     }
 
     private void openWriteCharValueDialog(BleOtherChar bleOtherChar, String payload) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_BLE_OTHER_WRITE_CHAR_VALUE;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_BLE_OTHER_WRITE_CHAR_VALUE;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("mac", bleOtherChar.mac);
         jsonObject.addProperty("service_uuid", bleOtherChar.serviceUUID);
@@ -328,28 +328,28 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
         jsonObject.addProperty("payload", payload);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
     private void readCharValue(BleOtherChar bleOtherChar) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_BLE_OTHER_READ_CHAR_VALUE;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_BLE_OTHER_READ_CHAR_VALUE;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("mac", bleOtherChar.mac);
         jsonObject.addProperty("service_uuid", bleOtherChar.serviceUUID);
         jsonObject.addProperty("char_uuid", bleOtherChar.characteristicUUID);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
     private void changeNotifyEnable(BleOtherChar bleOtherChar) {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_BLE_OTHER_CHANGE_NOTIFY_ENABLE;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_BLE_OTHER_CHANGE_NOTIFY_ENABLE;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("mac", bleOtherChar.mac);
         jsonObject.addProperty("service_uuid", bleOtherChar.serviceUUID);
@@ -357,7 +357,7 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
         jsonObject.addProperty("switch_value", bleOtherChar.characteristicNotifyStatus == 1 ? 0 : 1);
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

@@ -18,8 +18,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgReadResult;
 import com.moko.support.remotegw03.event.DeviceOnlineEvent;
@@ -84,7 +84,7 @@ public class SyncTimeFromNTP03Activity extends BaseActivity<ActivitySyncFromNtp0
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_NTP_SERVER) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_NTP_SERVER) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -95,7 +95,7 @@ public class SyncTimeFromNTP03Activity extends BaseActivity<ActivitySyncFromNtp0
             mBind.cbSyncSwitch.setChecked(result.data.get("switch_value").getAsInt() == 1);
             mBind.etNtpServer.setText(result.data.get("server").getAsString());
         }
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_NTP_SERVER) {
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_NTP_SERVER) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -117,10 +117,10 @@ public class SyncTimeFromNTP03Activity extends BaseActivity<ActivitySyncFromNtp0
     }
 
     private void getNtpServer() {
-        int msgId = MQTTConstants.READ_MSG_ID_NTP_SERVER;
+        int msgId = MQTTConstants03.READ_MSG_ID_NTP_SERVER;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -142,13 +142,13 @@ public class SyncTimeFromNTP03Activity extends BaseActivity<ActivitySyncFromNtp0
 
 
     private void setNtpServer() {
-        int msgId = MQTTConstants.CONFIG_MSG_ID_NTP_SERVER;
+        int msgId = MQTTConstants03.CONFIG_MSG_ID_NTP_SERVER;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("switch_value", mBind.cbSyncSwitch.isChecked() ? 1 : 0);
         jsonObject.addProperty("server", mBind.etNtpServer.getText().toString());
         String message = assembleWriteCommonData(msgId, mMokoDevice.mac, jsonObject);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

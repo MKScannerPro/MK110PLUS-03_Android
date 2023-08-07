@@ -7,19 +7,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import com.moko.mkremotegw03.activity.set.ModifyMQTTSettings03Activity;
-import com.moko.mkremotegw03.databinding.FragmentSslDeviceUrlBinding;
+import com.moko.mkremotegw03.databinding.FragmentSslDeviceUrl03Binding;
 import com.moko.mkremotegw03.dialog.BottomDialog;
 
 import java.util.ArrayList;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
+public class SSLDeviceUrl03Fragment extends Fragment {
 
-public class SSLDeviceUrlFragment extends Fragment {
-
-    private static final String TAG = SSLDeviceUrlFragment.class.getSimpleName();
-    private FragmentSslDeviceUrlBinding mBind;
+    private static final String TAG = SSLDeviceUrl03Fragment.class.getSimpleName();
+    private FragmentSslDeviceUrl03Binding mBind;
 
 
     private ModifyMQTTSettings03Activity activity;
@@ -33,11 +33,11 @@ public class SSLDeviceUrlFragment extends Fragment {
     private ArrayList<String> values;
     private int selected;
 
-    public SSLDeviceUrlFragment() {
+    public SSLDeviceUrl03Fragment() {
     }
 
-    public static SSLDeviceUrlFragment newInstance() {
-        SSLDeviceUrlFragment fragment = new SSLDeviceUrlFragment();
+    public static SSLDeviceUrl03Fragment newInstance() {
+        SSLDeviceUrl03Fragment fragment = new SSLDeviceUrl03Fragment();
         return fragment;
     }
 
@@ -50,7 +50,7 @@ public class SSLDeviceUrlFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
-        mBind = FragmentSslDeviceUrlBinding.inflate(inflater, container, false);
+        mBind = FragmentSslDeviceUrl03Binding.inflate(inflater, container, false);
         activity = (ModifyMQTTSettings03Activity) getActivity();
         mBind.clCertificate.setVisibility(mConnectMode > 0 ? View.VISIBLE : View.GONE);
         mBind.cbSsl.setChecked(mConnectMode > 0);

@@ -15,8 +15,8 @@ import com.moko.mkremotegw03.databinding.ActivityDeviceInformation03Binding;
 import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgReadResult;
 import com.moko.support.remotegw03.event.DeviceOnlineEvent;
 import com.moko.support.remotegw03.event.MQTTMessageArrivedEvent;
@@ -68,7 +68,7 @@ public class DeviceInfo03Activity extends BaseActivity<ActivityDeviceInformation
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_DEVICE_INFO) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_DEVICE_INFO) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -96,10 +96,10 @@ public class DeviceInfo03Activity extends BaseActivity<ActivityDeviceInformation
     }
 
     private void getDeviceInfo() {
-        int msgId = MQTTConstants.READ_MSG_ID_DEVICE_INFO;
+        int msgId = MQTTConstants03.READ_MSG_ID_DEVICE_INFO;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

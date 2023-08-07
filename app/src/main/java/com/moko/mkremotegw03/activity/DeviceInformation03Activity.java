@@ -10,7 +10,7 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityDeviceInformation03Binding;
-import com.moko.support.remotegw03.MokoSupport;
+import com.moko.support.remotegw03.MokoSupport03;
 import com.moko.support.remotegw03.OrderTaskAssembler;
 import com.moko.support.remotegw03.entity.OrderCHAR;
 import com.moko.support.remotegw03.entity.ParamsKeyEnum;
@@ -37,7 +37,7 @@ public class DeviceInformation03Activity extends BaseActivity<ActivityDeviceInfo
             orderTasks.add(OrderTaskAssembler.getSoftwareVersion());
             orderTasks.add(OrderTaskAssembler.getWifiMac());
             orderTasks.add(OrderTaskAssembler.getBleMac());
-            MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+            MokoSupport03.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         }, 500);
     }
 

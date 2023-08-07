@@ -11,9 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.moko.mkremotegw03.R;
 import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.FragmentSslAppBinding;
+import com.moko.mkremotegw03.databinding.FragmentSslApp03Binding;
 import com.moko.mkremotegw03.dialog.BottomDialog;
 import com.moko.mkremotegw03.utils.FileUtils;
 import com.moko.mkremotegw03.utils.ToastUtils;
@@ -21,16 +24,13 @@ import com.moko.mkremotegw03.utils.ToastUtils;
 import java.io.File;
 import java.util.ArrayList;
 
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-public class SSLFragment extends Fragment {
+public class SSL03Fragment extends Fragment {
     public static final int REQUEST_CODE_SELECT_CA = 0x10;
     public static final int REQUEST_CODE_SELECT_CLIENT_KEY = 0x11;
     public static final int REQUEST_CODE_SELECT_CLIENT_CERT = 0x12;
 
-    private static final String TAG = SSLFragment.class.getSimpleName();
-    private FragmentSslAppBinding mBind;
+    private static final String TAG = SSL03Fragment.class.getSimpleName();
+    private FragmentSslApp03Binding mBind;
 
 
     private BaseActivity activity;
@@ -44,11 +44,11 @@ public class SSLFragment extends Fragment {
     private ArrayList<String> values;
     private int selected;
 
-    public SSLFragment() {
+    public SSL03Fragment() {
     }
 
-    public static SSLFragment newInstance() {
-        SSLFragment fragment = new SSLFragment();
+    public static SSL03Fragment newInstance() {
+        SSL03Fragment fragment = new SSL03Fragment();
         return fragment;
     }
 
@@ -62,7 +62,7 @@ public class SSLFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
-        mBind = FragmentSslAppBinding.inflate(inflater, container, false);
+        mBind = FragmentSslApp03Binding.inflate(inflater, container, false);
         activity = (BaseActivity) getActivity();
         mBind.clCertificate.setVisibility(connectMode > 0 ? View.VISIBLE : View.GONE);
         mBind.cbSsl.setChecked(connectMode > 0);

@@ -19,8 +19,8 @@ import com.moko.mkremotegw03.entity.MQTTConfig;
 import com.moko.mkremotegw03.entity.MokoDevice;
 import com.moko.mkremotegw03.utils.SPUtiles;
 import com.moko.mkremotegw03.utils.ToastUtils;
-import com.moko.support.remotegw03.MQTTConstants;
-import com.moko.support.remotegw03.MQTTSupport;
+import com.moko.support.remotegw03.MQTTConstants03;
+import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgReadResult;
 import com.moko.support.remotegw03.event.MQTTMessageArrivedEvent;
@@ -58,7 +58,7 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
         mBind.tvReset.setOnClickListener(v -> resetEnergyData());
         mBind.layoutMeteringSwitch.setOnClickListener(v -> {
             if (isWindowLocked()) return;
-            if (!MQTTSupport.getInstance().isConnected()) {
+            if (!MQTTSupport03.getInstance().isConnected()) {
                 ToastUtils.showToast(this, R.string.network_error);
                 return;
             }
@@ -82,11 +82,11 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
         dialog.setOnAlertConfirmListener(() -> {
             mHandler.postDelayed(this::dismissLoadingProgressDialog, 30 * 1000);
             showLoadingProgressDialog();
-            int msgId = MQTTConstants.CONFIG_MSG_ID_RESET_ENERGY_DATA;
+            int msgId = MQTTConstants03.CONFIG_MSG_ID_RESET_ENERGY_DATA;
             //这里不能直接传null
             String message = assembleWriteCommonData(msgId, mMokoDevice.mac, new JsonObject());
             try {
-                MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+                MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
             } catch (MqttException e) {
                 e.printStackTrace();
             }
@@ -109,7 +109,7 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
             e.printStackTrace();
             return;
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_POWER_METERING_ENABLE) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_POWER_METERING_ENABLE) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -127,7 +127,7 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
                 getEnergyData();
             }
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_POWER_DATA || msg_id == MQTTConstants.NOTIFY_MSG_ID_POWER_DATA) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_POWER_DATA || msg_id == MQTTConstants03.NOTIFY_MSG_ID_POWER_DATA) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -139,7 +139,7 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
             mBind.tvCurrentMa.setText(String.valueOf(current));
             mBind.tvPower.setText(power);
         }
-        if (msg_id == MQTTConstants.READ_MSG_ID_ENERGY_DATA || msg_id == MQTTConstants.NOTIFY_MSG_ID_ENERGY_DATA) {
+        if (msg_id == MQTTConstants03.READ_MSG_ID_ENERGY_DATA || msg_id == MQTTConstants03.NOTIFY_MSG_ID_ENERGY_DATA) {
             Type type = new TypeToken<MsgReadResult<JsonObject>>() {
             }.getType();
             MsgReadResult<JsonObject> result = new Gson().fromJson(message, type);
@@ -150,7 +150,7 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
             mBind.tvEnergy.setText(energy);
         }
 
-        if (msg_id == MQTTConstants.CONFIG_MSG_ID_RESET_ENERGY_DATA) {
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_RESET_ENERGY_DATA) {
             Type type = new TypeToken<MsgConfigResult>() {
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
@@ -173,30 +173,30 @@ public class PowerMeteringActivity extends BaseActivity<ActivityPowerMeteringBin
             finish();
         }, 30 * 1000);
         showLoadingProgressDialog();
-        int msgId = MQTTConstants.READ_MSG_ID_POWER_METERING_ENABLE;
+        int msgId = MQTTConstants03.READ_MSG_ID_POWER_METERING_ENABLE;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
     private void getPowerMeteringData() {
-        int msgId = MQTTConstants.READ_MSG_ID_POWER_DATA;
+        int msgId = MQTTConstants03.READ_MSG_ID_POWER_DATA;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
 
     private void getEnergyData() {
-        int msgId = MQTTConstants.READ_MSG_ID_ENERGY_DATA;
+        int msgId = MQTTConstants03.READ_MSG_ID_ENERGY_DATA;
         String message = assembleReadCommon(msgId, mMokoDevice.mac);
         try {
-            MQTTSupport.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
+            MQTTSupport03.getInstance().publish(mAppTopic, message, msgId, appMqttConfig.qos);
         } catch (MqttException e) {
             e.printStackTrace();
         }

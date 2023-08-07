@@ -7,16 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.moko.mkremotegw03.base.BaseActivity;
-import com.moko.mkremotegw03.databinding.FragmentGeneralAppBinding;
-import com.moko.mkremotegw03.utils.ToastUtils;
-
 import androidx.fragment.app.Fragment;
 
-public class GeneralFragment extends Fragment {
+import com.moko.mkremotegw03.base.BaseActivity;
+import com.moko.mkremotegw03.databinding.FragmentGeneralApp03Binding;
+import com.moko.mkremotegw03.utils.ToastUtils;
 
-    private static final String TAG = GeneralFragment.class.getSimpleName();
-    private FragmentGeneralAppBinding mBind;
+public class General03Fragment extends Fragment {
+
+    private static final String TAG = General03Fragment.class.getSimpleName();
+    private FragmentGeneralApp03Binding mBind;
 
     private BaseActivity activity;
 
@@ -24,11 +24,11 @@ public class GeneralFragment extends Fragment {
     private int qos;
     private int keepAlive;
 
-    public GeneralFragment() {
+    public General03Fragment() {
     }
 
-    public static GeneralFragment newInstance() {
-        GeneralFragment fragment = new GeneralFragment();
+    public static General03Fragment newInstance() {
+        General03Fragment fragment = new General03Fragment();
         return fragment;
     }
 
@@ -42,7 +42,7 @@ public class GeneralFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
-        mBind = FragmentGeneralAppBinding.inflate(inflater, container, false);
+        mBind = FragmentGeneralApp03Binding.inflate(inflater, container, false);
         activity = (BaseActivity) getActivity();
         mBind.cbCleanSession.setChecked(cleanSession);
         if (qos == 0) {

@@ -2,7 +2,7 @@ package com.moko.support.remotegw03.task;
 
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.utils.MokoUtils;
-import com.moko.support.remotegw03.MokoSupport;
+import com.moko.support.remotegw03.MokoSupport03;
 import com.moko.support.remotegw03.entity.OrderCHAR;
 import com.moko.support.remotegw03.entity.ParamsKeyEnum;
 import com.moko.support.remotegw03.entity.ParamsLongKeyEnum;
@@ -916,9 +916,9 @@ public class ParamsTask extends OrderTask {
                     data[4] = 0;
                     response.responseValue = data;
                     orderStatus = ORDER_STATUS_SUCCESS;
-                    MokoSupport.getInstance().pollTask();
-                    MokoSupport.getInstance().executeTask();
-                    MokoSupport.getInstance().orderResult(response);
+                    MokoSupport03.getInstance().pollTask();
+                    MokoSupport03.getInstance().executeTask();
+                    MokoSupport03.getInstance().orderResult(response);
                     return false;
                 }
                 byte[] remainBytes = Arrays.copyOfRange(value, 6, 6 + length);
@@ -937,9 +937,9 @@ public class ParamsTask extends OrderTask {
                 }
                 response.responseValue = data;
                 orderStatus = ORDER_STATUS_SUCCESS;
-                MokoSupport.getInstance().pollTask();
-                MokoSupport.getInstance().executeTask();
-                MokoSupport.getInstance().orderResult(response);
+                MokoSupport03.getInstance().pollTask();
+                MokoSupport03.getInstance().executeTask();
+                MokoSupport03.getInstance().orderResult(response);
                 dataBytesStr = "";
             }
         }
@@ -971,7 +971,7 @@ public class ParamsTask extends OrderTask {
                 data[i + 6] = dataBytes[dataOrigin];
             }
         }
-        MokoSupport.getInstance().sendDirectOrder(this);
+        MokoSupport03.getInstance().sendDirectOrder(this);
     }
 
     public void setIBeaconEnable(@IntRange(from = 0, to = 1) int enable) {
