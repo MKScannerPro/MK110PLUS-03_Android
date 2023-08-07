@@ -1098,7 +1098,7 @@ public class ParamsTask extends OrderTask {
                 (byte) 0xED,
                 (byte) 0x01,
                 (byte) ParamsKeyEnum.KEY_UTC_TIME.getParamsKey(),
-                (byte) 0x01,
+                (byte) 0x04,
                 timeBytes[4],
                 timeBytes[5],
                 timeBytes[6],
