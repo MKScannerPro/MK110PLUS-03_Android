@@ -6,9 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 
-import com.moko.mkremotegw03.activity.set.ModifyMQTTSettingsActivity;
+import com.moko.mkremotegw03.activity.set.ModifyMQTTSettings03Activity;
 import com.moko.mkremotegw03.databinding.FragmentSslDeviceUrlBinding;
 import com.moko.mkremotegw03.dialog.BottomDialog;
 
@@ -23,7 +22,7 @@ public class SSLDeviceUrlFragment extends Fragment {
     private FragmentSslDeviceUrlBinding mBind;
 
 
-    private ModifyMQTTSettingsActivity activity;
+    private ModifyMQTTSettings03Activity activity;
 
     private int mConnectMode = 0;
 
@@ -52,7 +51,7 @@ public class SSLDeviceUrlFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
         mBind = FragmentSslDeviceUrlBinding.inflate(inflater, container, false);
-        activity = (ModifyMQTTSettingsActivity) getActivity();
+        activity = (ModifyMQTTSettings03Activity) getActivity();
         mBind.clCertificate.setVisibility(mConnectMode > 0 ? View.VISIBLE : View.GONE);
         mBind.cbSsl.setChecked(mConnectMode > 0);
         mBind.cbSsl.setOnCheckedChangeListener((buttonView, isChecked) -> {

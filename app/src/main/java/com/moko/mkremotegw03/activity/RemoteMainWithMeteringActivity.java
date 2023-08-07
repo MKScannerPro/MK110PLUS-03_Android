@@ -22,8 +22,8 @@ import com.google.gson.reflect.TypeToken;
 import com.moko.mkremotegw03.AppConstants;
 import com.moko.mkremotegw03.BuildConfig;
 import com.moko.mkremotegw03.R;
-import com.moko.mkremotegw03.activity.set.DeviceSettingActivity;
-import com.moko.mkremotegw03.activity.set.ModifySettingsActivity;
+import com.moko.mkremotegw03.activity.set.DeviceSetting03Activity;
+import com.moko.mkremotegw03.activity.set.ModifySettings03Activity;
 import com.moko.mkremotegw03.adapter.DeviceAdapter;
 import com.moko.mkremotegw03.base.BaseActivity;
 import com.moko.mkremotegw03.databinding.ActivityMainRemoteWithMeteringBinding;
@@ -110,7 +110,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
         } catch (FileNotFoundException e) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ToastUtils.showToast(this, "Please select your SSL certificates again, otherwise the APP can't use normally.");
-                startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
+                startActivityForResult(new Intent(this, SetAppMQTT03Activity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
             }
             // 读取stacktrace信息
             final Writer result = new StringWriter();
@@ -200,8 +200,8 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
         if (getIntent().getExtras() != null) {
             String from = getIntent().getStringExtra(AppConstants.EXTRA_KEY_FROM_ACTIVITY);
             String mac = getIntent().getStringExtra(AppConstants.EXTRA_KEY_MAC);
-            if (ModifyNameActivity.TAG.equals(from)
-                    || DeviceSettingActivity.TAG.equals(from)) {
+            if (ModifyName03Activity.TAG.equals(from)
+                    || DeviceSetting03Activity.TAG.equals(from)) {
                 devices.clear();
                 devices.addAll(DBTools.getInstance(this).selectAllDevice());
                 if (!TextUtils.isEmpty(mac)) {
@@ -231,7 +231,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
                     mBind.rlEmpty.setVisibility(View.VISIBLE);
                 }
             }
-            if (ModifySettingsActivity.TAG.equals(from)) {
+            if (ModifySettings03Activity.TAG.equals(from)) {
                 if (!TextUtils.isEmpty(mac)) {
                     MokoDevice mokoDevice = DBTools.getInstance(this).selectDevice(mac);
                     for (final MokoDevice device : devices) {
@@ -274,23 +274,23 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
     public void setAppMQTTConfig(View view) {
         if (isWindowLocked())
             return;
-        startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
+        startActivityForResult(new Intent(this, SetAppMQTT03Activity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
     }
 
     public void mainAddDevices(View view) {
         if (isWindowLocked())
             return;
         if (TextUtils.isEmpty(mAppMqttConfigStr)) {
-            startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
+            startActivityForResult(new Intent(this, SetAppMQTT03Activity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
             return;
         }
         if (Utils.isNetworkAvailable(this)) {
             MQTTConfig MQTTAppConfig = new Gson().fromJson(mAppMqttConfigStr, MQTTConfig.class);
             if (TextUtils.isEmpty(MQTTAppConfig.host)) {
-                startActivityForResult(new Intent(this, SetAppMQTTActivity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
+                startActivityForResult(new Intent(this, SetAppMQTT03Activity.class), AppConstants.REQUEST_CODE_MQTT_CONFIG_APP);
                 return;
             }
-            startActivity(new Intent(this, DeviceScannerActivity.class));
+            startActivity(new Intent(this, DeviceScanner03Activity.class));
         } else {
             String ssid = Utils.getWifiSSID(this);
             ToastUtils.showToast(this, String.format("SSID:%s, the network cannot available,please check", ssid));
@@ -311,7 +311,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
             ToastUtils.showToast(this, R.string.device_offline);
             return;
         }
-        Intent i = new Intent(RemoteMainWithMeteringActivity.this, DeviceDetailActivity.class);
+        Intent i = new Intent(RemoteMainWithMeteringActivity.this, DeviceDetail03Activity.class);
         i.putExtra(AppConstants.EXTRA_KEY_DEVICE, mokoDevice);
         startActivity(i);
     }
