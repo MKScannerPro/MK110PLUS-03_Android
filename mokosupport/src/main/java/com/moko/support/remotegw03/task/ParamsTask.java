@@ -1088,11 +1088,11 @@ public class ParamsTask extends OrderTask {
         };
     }
 
-    public void setCurrentUtcTime(){
+    public void setCurrentUtcTime() {
         Calendar calendar = Calendar.getInstance();
         TimeZone timeZone = TimeZone.getTimeZone("UTC");
         calendar.setTimeZone(timeZone);
-        long utcTime = calendar.getTimeInMillis();
+        long utcTime = calendar.getTimeInMillis() / 1000;
         byte[] timeBytes = ByteBuffer.allocate(8).putLong(utcTime).array();
         response.responseValue = data = new byte[]{
                 (byte) 0xED,

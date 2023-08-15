@@ -308,11 +308,12 @@ public class AdvertiseIBeacon03Activity extends BaseActivity<ActivityAdvertiseIb
     public void onSave(View view) {
         if (isWindowLocked()) return;
         if (null == mMokoDevice) {
-            showLoadingProgressDialog();
             if (!mBind.cbIBeacon.isChecked()) {
+                showLoadingProgressDialog();
                 MokoSupport03.getInstance().sendOrder(OrderTaskAssembler.setIBeaconEnable(0));
             } else {
                 if (isValid()) {
+                    showLoadingProgressDialog();
                     List<OrderTask> orderTasks = new ArrayList<>(8);
                     orderTasks.add(OrderTaskAssembler.setIBeaconEnable(1));
                     int major = Integer.parseInt(mBind.etMajor.getText().toString());

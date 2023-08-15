@@ -85,7 +85,6 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
             getLoadState();
         }
         mBind.cbMetering.setOnCheckedChangeListener((buttonView, isChecked) -> mBind.layoutMetering.setVisibility(isChecked ? View.VISIBLE : View.GONE));
-        mBind.cbDetectionNotify.setOnCheckedChangeListener((buttonView, isChecked) -> mBind.group.setVisibility(isChecked ? View.VISIBLE : View.GONE));
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 100)
@@ -176,7 +175,6 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
                                     if (length == 1) {
                                         int enable = value[4] & 0xff;
                                         mBind.cbDetectionNotify.setChecked(enable == 1);
-                                        mBind.group.setVisibility(enable == 1 ? View.VISIBLE : View.GONE);
                                     }
                                     break;
 
@@ -231,7 +229,6 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
                 mHandler.removeMessages(0);
             }
             mBind.cbDetectionNotify.setChecked(enable == 1);
-            mBind.group.setVisibility(enable == 1 ? View.VISIBLE : View.GONE);
             getPowerReportInterval();
             getEnergyReportInterval();
         }
@@ -278,18 +275,12 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
             }.getType();
             MsgConfigResult result = new Gson().fromJson(message, type);
             if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
-            if (!mBind.cbDetectionNotify.isChecked()) {
+            if (result.result_code == 0) {
+                setPowerEnergyReportInterval(MQTTConstants03.CONFIG_MSG_ID_POWER_REPORT_INTERVAL, Integer.parseInt(mBind.etPowerInterval.getText().toString()));
+            } else {
+                ToastUtils.showToast(this, "Set up failed");
                 dismissLoadingProgressDialog();
                 mHandler.removeMessages(0);
-                ToastUtils.showToast(this, result.result_code == 0 ? "Set up succeed" : "Set up failed");
-            } else {
-                if (result.result_code == 0) {
-                    setPowerEnergyReportInterval(MQTTConstants03.CONFIG_MSG_ID_POWER_REPORT_INTERVAL, Integer.parseInt(mBind.etPowerInterval.getText().toString()));
-                } else {
-                    ToastUtils.showToast(this, "Set up failed");
-                    dismissLoadingProgressDialog();
-                    mHandler.removeMessages(0);
-                }
             }
         }
         if (msg_id == MQTTConstants03.CONFIG_MSG_ID_POWER_REPORT_INTERVAL) {
@@ -365,38 +356,32 @@ public class MeteringSettingsActivity extends BaseActivity<ActivityMeteringSetti
     public void onSave(View view) {
         if (isWindowLocked()) return;
         if (null == mMokoDevice) {
+            //蓝牙
             if (!mBind.cbMetering.isChecked()) {
                 showLoadingProgressDialog();
                 MokoSupport03.getInstance().sendOrder(OrderTaskAssembler.setMeteringReportEnable(0));
             } else {
                 List<OrderTask> orderTasks = new ArrayList<>(4);
                 orderTasks.add(OrderTaskAssembler.setMeteringReportEnable(1));
-                if (mBind.cbDetectionNotify.isChecked()) {
-                    if (!isValid()) {
-                        ToastUtils.showToast(this, "Para Error");
-                        return;
-                    }
-                    showLoadingProgressDialog();
-                    int powerInterval = Integer.parseInt(mBind.etPowerInterval.getText().toString());
-                    int energyInterval = Integer.parseInt(mBind.etEnergyInterval.getText().toString());
-                    orderTasks.add(OrderTaskAssembler.setLoadDetectionNotifyEnable(1));
-                    orderTasks.add(OrderTaskAssembler.setPowerReportInterval(powerInterval));
-                    orderTasks.add(OrderTaskAssembler.setEnergyReportInterval(energyInterval));
-                } else {
-                    showLoadingProgressDialog();
-                    orderTasks.add(OrderTaskAssembler.setLoadDetectionNotifyEnable(0));
+                if (!isValid()) {
+                    ToastUtils.showToast(this, "Para Error");
+                    return;
                 }
+                showLoadingProgressDialog();
+                int powerInterval = Integer.parseInt(mBind.etPowerInterval.getText().toString());
+                int energyInterval = Integer.parseInt(mBind.etEnergyInterval.getText().toString());
+                orderTasks.add(OrderTaskAssembler.setLoadDetectionNotifyEnable(mBind.cbDetectionNotify.isChecked() ? 1 : 0));
+                orderTasks.add(OrderTaskAssembler.setPowerReportInterval(powerInterval));
+                orderTasks.add(OrderTaskAssembler.setEnergyReportInterval(energyInterval));
                 MokoSupport03.getInstance().sendOrder(orderTasks.toArray(new OrderTask[0]));
             }
         } else {
             if (!mBind.cbMetering.isChecked()) {
                 setMeteringEnable(0, MQTTConstants03.CONFIG_MSG_ID_POWER_METERING_ENABLE);
             } else {
-                if (mBind.cbDetectionNotify.isChecked()) {
-                    if (!isValid()) {
-                        ToastUtils.showToast(this, "Para Error");
-                        return;
-                    }
+                if (!isValid()) {
+                    ToastUtils.showToast(this, "Para Error");
+                    return;
                 }
                 setMeteringEnable(1, MQTTConstants03.CONFIG_MSG_ID_POWER_METERING_ENABLE);
             }

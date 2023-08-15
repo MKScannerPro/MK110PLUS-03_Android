@@ -221,7 +221,6 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
                                         mBind.clDomainId.setVisibility(View.GONE);
                                         mBind.llCert.setVisibility(View.GONE);
                                         mBind.llKey.setVisibility(View.GONE);
-                                        mBind.tvCertTips.setVisibility(View.GONE);
                                     } else {
                                         if (mEAPTypeSelected != 2)
                                             mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
@@ -233,7 +232,6 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
                                         mBind.clDomainId.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
                                         mBind.llCert.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
                                         mBind.llKey.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
-                                        mBind.tvCertTips.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
                                     }
                                     break;
                                 case KEY_WIFI_EAP_USERNAME:
@@ -280,7 +278,6 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
                 mBind.clDomainId.setVisibility(View.GONE);
                 mBind.llCert.setVisibility(View.GONE);
                 mBind.llKey.setVisibility(View.GONE);
-                mBind.tvCertTips.setVisibility(View.GONE);
             } else {
                 if (mEAPTypeSelected != 2)
                     mBind.llCa.setVisibility(mBind.cbVerifyServer.isChecked() ? View.VISIBLE : View.GONE);
@@ -292,7 +289,6 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
                 mBind.clDomainId.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
                 mBind.llCert.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
                 mBind.llKey.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
-                mBind.tvCertTips.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
             }
         });
         dialog.show(getSupportFragmentManager());
@@ -326,11 +322,9 @@ public class WifiSettings03Activity extends BaseActivity<ActivityWifiSettings03B
                 mBind.llCa.setVisibility(View.VISIBLE);
             mBind.llCert.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
             mBind.llKey.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
-            mBind.tvCertTips.setVisibility(mEAPTypeSelected == 2 ? View.VISIBLE : View.GONE);
         });
         dialog.show(getSupportFragmentManager());
     }
-
 
     public void selectCAFile(View view) {
         if (isWindowLocked()) return;
