@@ -460,7 +460,6 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/tv_cert_tips"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
@@ -468,11 +467,9 @@
                 android:text="Please note the country\u0026Band is a configuration for 5GHZ WiFi,if using 2.4GHz WiFi, there is no need to choose the band."
                 android:textColor="@color/black_333333"
                 android:textSize="13sp"
-                android:visibility="gone"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layoutCountry"
-                tools:visibility="visible" />
+                app:layout_constraintTop_toBottomOf="@id/layoutCountry" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </LinearLayout>
