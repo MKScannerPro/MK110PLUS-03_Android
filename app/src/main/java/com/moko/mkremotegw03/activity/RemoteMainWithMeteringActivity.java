@@ -425,7 +425,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
                     Type netType = new TypeToken<MsgNotify<JsonObject>>() {
                     }.getType();
                     MsgNotify<JsonObject> netMsgNotify = new Gson().fromJson(message, netType);
-                    device.netStatus = netMsgNotify.data.get("net_status").getAsInt();
+                    device.wifiRssi = netMsgNotify.data.get("wifi_rssi").getAsInt();
                 }
                 device.isOnline = true;
                 if (mHandler.hasMessages(device.id)) {

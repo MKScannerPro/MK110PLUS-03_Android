@@ -1,5 +1,6 @@
 package com.moko.mkremotegw03.activity;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
@@ -101,7 +102,9 @@ public class BeaconDFU03Activity extends BaseActivity<ActivityBeaconDfu03Binding
             int resultCode = result.data.get("result_code").getAsInt();
             ToastUtils.showToast(this,
                     String.format("Beacon DFU %s!", resultCode == 0 ? "successfully" : "failed"));
-            setResult(RESULT_OK);
+            Intent intent = new Intent();
+            intent.putExtra("code", resultCode);
+            setResult(RESULT_OK, intent);
             finish();
         }
         if (msg_id == MQTTConstants03.CONFIG_MSG_ID_BLE_DFU) {

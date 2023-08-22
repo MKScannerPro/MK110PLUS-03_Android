@@ -7,7 +7,6 @@ import com.moko.mkremotegw03.entity.MokoDevice;
 
 import androidx.core.content.ContextCompat;
 
-
 public class Device03Adapter extends BaseQuickAdapter<MokoDevice, BaseViewHolder> {
 
     public Device03Adapter() {
@@ -25,12 +24,13 @@ public class Device03Adapter extends BaseQuickAdapter<MokoDevice, BaseViewHolder
         } else {
             helper.setText(R.id.tv_device_status, mContext.getString(R.string.device_state_online));
             helper.setTextColor(R.id.tv_device_status, ContextCompat.getColor(mContext, R.color.blue_0188cc));
-            if (item.netStatus == 0)
+            if (item.wifiRssi >= -50) {
                 helper.setImageResource(R.id.iv_net_status, R.drawable.ic_net_good);
-            else if (item.netStatus == 1)
+            } else if (item.wifiRssi >= -65) {
                 helper.setImageResource(R.id.iv_net_status, R.drawable.ic_net_medium);
-            else if (item.netStatus == 2)
+            } else {
                 helper.setImageResource(R.id.iv_net_status, R.drawable.ic_net_poor);
+            }
         }
     }
 }
