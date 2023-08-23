@@ -31,6 +31,7 @@ import com.moko.support.remotegw03.MQTTSupport03;
 import com.moko.support.remotegw03.entity.BleCharResponse;
 import com.moko.support.remotegw03.entity.BleCharacteristic;
 import com.moko.support.remotegw03.entity.BleService;
+import com.moko.support.remotegw03.entity.MsgConfigResult;
 import com.moko.support.remotegw03.entity.MsgNotify;
 import com.moko.support.remotegw03.entity.OtherDeviceInfo;
 import com.moko.support.remotegw03.event.DeviceModifyNameEvent;
@@ -115,6 +116,17 @@ public class BleOtherInfo03Activity extends BaseActivity<ActivityOtherInfo03Bind
         } catch (Exception e) {
             e.printStackTrace();
             return;
+        }
+        if (msg_id == MQTTConstants03.CONFIG_MSG_ID_BLE_OTHER_WRITE_CHAR_VALUE){
+            Type type = new TypeToken<MsgConfigResult>() {
+            }.getType();
+            MsgConfigResult result = new Gson().fromJson(message, type);
+            if (!mMokoDevice.mac.equalsIgnoreCase(result.device_info.mac)) return;
+            if (result.result_code != 0) {
+                mHandler.removeMessages(0);
+                dismissLoadingProgressDialog();
+                ToastUtils.showToast(this, "write failed");
+            }
         }
         if (msg_id == MQTTConstants03.NOTIFY_MSG_ID_BLE_OTHER_CHANGE_NOTIFY_ENABLE) {
             dismissLoadingProgressDialog();
