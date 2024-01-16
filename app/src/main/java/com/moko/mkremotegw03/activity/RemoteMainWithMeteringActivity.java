@@ -478,7 +478,7 @@ public class RemoteMainWithMeteringActivity extends BaseActivity<ActivityMainRem
     protected void onDestroy() {
         super.onDestroy();
         MQTTSupport03.getInstance().disconnectMqtt();
-        if (!devices.isEmpty()) {
+        if (devices != null && !devices.isEmpty()) {
             for (final MokoDevice device : devices) {
                 if (mHandler.hasMessages(device.id)) {
                     mHandler.removeMessages(device.id);
